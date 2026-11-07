@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:provider/provider.dart';
-import 'package:safari_ya_mama/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safari_ya_mama/app/app.dart';
+import 'package:safari_ya_mama/app/providers.dart';
 import 'package:safari_ya_mama/core/content.dart';
 import 'package:safari_ya_mama/core/dates.dart';
 import 'package:safari_ya_mama/data/local_store.dart';
@@ -158,7 +159,7 @@ void main() {
     t.view.physicalSize = const Size(1080, 2340);
     t.view.devicePixelRatio = 2.75;
     addTearDown(t.view.reset);
-    await t.pumpWidget(ChangeNotifierProvider.value(value: s, child: const SafariYaMamaApp()));
+    await t.pumpWidget(ProviderScope(overrides: [appStateProvider.overrideWith((ref) => s)], child: const SafariYaMamaApp()));
     await t.pumpAndSettle();
 
     Future<void> tapKey(String k) async {
@@ -176,7 +177,9 @@ void main() {
       await t.pumpAndSettle();
     }
 
-    await t.tap(find.text('My baby'));
+    await t.tap(find.byKey(const Key('tab-journey')));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Baby'));
     await t.pumpAndSettle();
     await tapKey('record-birth');
     await tapKey('count-2');

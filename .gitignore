@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# visual audit output (regenerate with: flutter test test_screens/audit_test.dart --update-goldens)
+test_screens/shots/
+test_screens/website/
+test_screens/review/
+test_screens/failures/

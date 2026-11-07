@@ -31,8 +31,6 @@ class _BirthPlanScreenState extends State<BirthPlanScreen> {
       appBar: AppBar(title: Text(context.t('My birth plan', 'Mpango wangu wa kujifungua')), actions: const [EmergencyButton()]),
       body: Pad(
         children: [
-          const Illus('bag', height: 140),
-          const Gap(16),
           AppCard(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(

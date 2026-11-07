@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:provider/provider.dart';
-import 'package:safari_ya_mama/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safari_ya_mama/app/app.dart';
+import 'package:safari_ya_mama/app/providers.dart';
 import 'package:safari_ya_mama/core/content.dart';
 import 'package:safari_ya_mama/core/dates.dart';
 import 'package:safari_ya_mama/core/first_aid.dart';
@@ -128,7 +129,7 @@ void main() {
       addTearDown(t.view.reset);
       t.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
       addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
-      await t.pumpWidget(ChangeNotifierProvider.value(value: s, child: const SafariYaMamaApp()));
+      await t.pumpWidget(ProviderScope(overrides: [appStateProvider.overrideWith((ref) => s)], child: const SafariYaMamaApp()));
       await t.pumpAndSettle();
       return s;
     }
@@ -153,7 +154,9 @@ void main() {
       expect(find.byKey(const Key('journey-card')), findsOneWidget);
       expect(find.text('Month 4 of 9'), findsOneWidget);
       expect(find.text('Zuri: Laughs and holds the head steady'), findsOneWidget);
-      await t.tap(find.text('Health'));
+      await t.tap(find.byKey(const Key('tab-journey')));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Mother'));
       await t.pumpAndSettle();
       expect(find.text('Month by month'), findsOneWidget);
       expect(find.byKey(const Key('baby-month-4')), findsOneWidget);
@@ -186,7 +189,7 @@ void main() {
 
     testWidgets('first aid: choking opens with the animated back blows and counter', (t) async {
       await pump(t);
-      await t.tap(find.text('My baby'));
+      await t.tap(find.byKey(const Key('tab-journey')));
       await t.pumpAndSettle();
       await tapKey(t, 'open-first-aid');
       await t.tap(find.byKey(const Key('aid-choking')));

@@ -1,89 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/router.dart';
 import '../theme.dart';
 import '../widgets.dart';
-import 'baby_screen.dart';
-import 'health_screen.dart';
-import 'home_screen.dart';
-import 'learn_screen.dart';
-import 'profile_screen.dart';
-import 'visits_screen.dart';
+import 'app_drawer.dart';
 
-/// Five low-effort tabs, with Emergency help always one tap away.
-class Shell extends StatefulWidget {
-  const Shell({super.key});
+/// Bottom navigation for the five tabs: Home · My Care · MamaBot · Community · Learn.
+/// The side menu (☰, app_drawer.dart) lists everything, including Profile and settings.
+/// Tabs are peers: no slide between them, each keeps its own back stack, and tapping the
+/// active tab again returns it to its first screen.
+/// The outer scaffold: holds the side menu so it covers the whole screen, tab bar included.
+final shellScaffoldKey = GlobalKey<ScaffoldState>(debugLabel: 'shell');
+
+class Shell extends StatelessWidget {
+  final StatefulNavigationShell shell;
+  const Shell({super.key, required this.shell});
+
   @override
-  State<Shell> createState() => _ShellState();
+  Widget build(BuildContext context) => Scaffold(
+    key: shellScaffoldKey,
+    drawer: AppDrawer(shell: shell),
+    body: shell,
+    bottomNavigationBar: DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: C.line)),
+      ),
+      child: NavigationBar(
+        selectedIndex: shell.currentIndex,
+        onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        destinations: [
+          NavigationDestination(
+            key: const Key('tab-home'),
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: context.t('Home', 'Nyumbani'),
+          ),
+          NavigationDestination(
+            key: const Key('tab-journey'),
+            icon: const Icon(Icons.monitor_heart_outlined),
+            selectedIcon: const Icon(Icons.monitor_heart),
+            label: context.t('My Care', 'Huduma'),
+          ),
+          const NavigationDestination(
+            key: Key('tab-mamabot'),
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'MamaBot',
+          ),
+          NavigationDestination(
+            key: const Key('tab-community'),
+            icon: const Icon(Icons.groups_outlined),
+            selectedIcon: const Icon(Icons.groups),
+            label: context.t('Community', 'Jamii'),
+          ),
+          NavigationDestination(
+            key: const Key('tab-learn'),
+            icon: const Icon(Icons.menu_book_outlined),
+            selectedIcon: const Icon(Icons.menu_book),
+            label: context.t('Learn', 'Jifunze'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
-class _ShellState extends State<Shell> {
-  int tab = 0;
+/// The first screen of a tab: the same top bar on every tab (title, notifications on Home,
+/// Emergency shortcut). Screens opened from a tab bring their own bar.
+class TabPage extends StatelessWidget {
+  final int tab;
+  final Widget child;
+  const TabPage({super.key, required this.tab, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final titles = [
-      'Safari ya Mama',
-      context.t('Health', 'Afya'),
-      context.t('My baby', 'Mtoto wangu'),
-      context.t('Learn', 'Jifunze'),
-      context.t('Visits', 'Kliniki'),
-    ];
-    final pages = [HomeScreen(onTab: (i) => setState(() => tab = i)), const HealthScreen(), const BabyScreen(), const LearnScreen(), const VisitsScreen()];
+    final s = context.app;
+    final titles = ['Safari ya Mama', context.t('My Care', 'Huduma yangu'), 'MamaBot', context.t("Mothers' circle", 'Kikundi cha akina mama'), context.t('Learn', 'Jifunze')];
+    final unread = s.unreadNotifications;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 60,
+        leading: IconButton(
+          key: const Key('open-menu'),
+          tooltip: context.t('Menu', 'Menyu'),
+          icon: Badge(isLabelVisible: unread > 0 && tab != 0, backgroundColor: C.primary, smallSize: 8, child: const Icon(Icons.menu_rounded)),
+          onPressed: () => shellScaffoldKey.currentState?.openDrawer(),
+        ),
         title: tab == 0
             ? FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [Image.asset('assets/brand/mark.png', width: 28, height: 28), const SizedBox(width: 8), Text(titles[0])],
+                  children: [
+                    Image.asset('assets/brand/mark.png', width: 32, height: 32),
+                    const SizedBox(width: Sp.sm),
+                    Text(titles[0]),
+                  ],
                 ),
               )
             : Text(titles[tab]),
         actions: [
-          IconButton(
-            key: const Key('open-profile'),
-            tooltip: context.t('Profile', 'Wasifu'),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => Scaffold(
-                  appBar: AppBar(title: Text(context.t('Profile', 'Wasifu')), actions: const [EmergencyButton()]),
-                  body: const ProfileScreen(),
-                ),
-              ),
+          if (tab == 0)
+            IconButton(
+              key: const Key('open-notifications'),
+              tooltip: context.t('Notifications', 'Arifa'),
+              onPressed: () => context.push(Routes.notifications),
+              icon: Badge(isLabelVisible: unread > 0, backgroundColor: C.primary, label: Text('$unread'), child: const Icon(Icons.notifications_none_rounded)),
             ),
-            icon: const Icon(Icons.account_circle_outlined, size: 30),
-          ),
-          const EmergencyButton(),
+          const EmergencyShortcut(),
         ],
       ),
-      body: IndexedStack(index: tab, children: pages),
-      bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: C.line)),
-        ),
-        child: NavigationBar(
-          selectedIndex: tab,
-          onDestinationSelected: (i) => setState(() => tab = i),
-          destinations: [
-            NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: context.t('Home', 'Nyumbani')),
-            NavigationDestination(icon: const Icon(Icons.favorite_border), selectedIcon: const Icon(Icons.favorite), label: context.t('Health', 'Afya')),
-            NavigationDestination(
-              icon: const Icon(Icons.child_care_outlined),
-              selectedIcon: const Icon(Icons.child_care),
-              label: context.t('My baby', 'Mtoto'),
-            ),
-            NavigationDestination(
-              key: const Key('tab-learn'),
-              icon: const Icon(Icons.menu_book_outlined),
-              selectedIcon: const Icon(Icons.menu_book),
-              label: context.t('Learn', 'Jifunze'),
-            ),
-            NavigationDestination(icon: const Icon(Icons.event_outlined), selectedIcon: const Icon(Icons.event), label: context.t('Visits', 'Kliniki')),
-          ],
-        ),
-      ),
+      body: child,
     );
   }
 }

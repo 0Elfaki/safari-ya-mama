@@ -22,9 +22,8 @@ class BabyScreen extends StatelessWidget {
     void go(Widget w) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => w));
     if (s.pregnant || s.baby == null) {
       return Pad(
+        key: const ValueKey('baby-before-birth'),
         children: [
-          const Illus('mother_baby', height: 200),
-          const Gap(16),
           Text(context.t('When your baby is born', 'Mtoto akizaliwa'), style: Theme.of(context).textTheme.headlineSmall),
           const Gap(8),
           Text(
@@ -63,6 +62,7 @@ class BabyScreen extends StatelessWidget {
     final m = s.babyMonths;
     final under6 = s.babyDays < 183;
     return Pad(
+      key: const ValueKey('baby-after-birth'),
       children: [
         const BabySwitcher(),
         AppCard(

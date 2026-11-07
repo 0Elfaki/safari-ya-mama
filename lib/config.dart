@@ -13,5 +13,11 @@ class AppConfig {
   static const fcmAppId = String.fromEnvironment('FCM_APP_ID');
   static const fcmSenderId = String.fromEnvironment('FCM_SENDER_ID');
   static const fcmProjectId = String.fromEnvironment('FCM_PROJECT_ID');
+
+  /// Google sign-in (optional): the OAuth client IDs from Google Cloud (not secrets).
+  /// GOOGLE_WEB_CLIENT_ID is the "Web application" client also entered in Supabase → Auth → Google.
+  static const googleWebClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+  static const googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
+
   static bool get hasPush => fcmApiKey.isNotEmpty && fcmAppId.isNotEmpty && fcmSenderId.isNotEmpty && fcmProjectId.isNotEmpty;
 }

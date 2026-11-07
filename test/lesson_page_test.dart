@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:provider/provider.dart';
-import 'package:safari_ya_mama/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safari_ya_mama/app/app.dart';
+import 'package:safari_ya_mama/app/providers.dart';
 import 'package:safari_ya_mama/core/lessons.g.dart';
 import 'package:safari_ya_mama/data/local_store.dart';
 import 'package:safari_ya_mama/state/app_state.dart';
@@ -27,7 +28,7 @@ void main() {
     t.view.physicalSize = const Size(1080, 2340);
     t.view.devicePixelRatio = 2.75;
     addTearDown(t.view.reset);
-    await t.pumpWidget(ChangeNotifierProvider.value(value: s, child: const SafariYaMamaApp()));
+    await t.pumpWidget(ProviderScope(overrides: [appStateProvider.overrideWith((ref) => s)], child: const SafariYaMamaApp()));
     await t.pumpAndSettle();
     t.state<NavigatorState>(find.byType(Navigator).first).push(MaterialPageRoute(builder: (_) => LessonScreen(id)));
     await t.pumpAndSettle();
@@ -77,8 +78,8 @@ void main() {
     expect(find.textContaining('fine'), findsNothing);
     await t.tap(find.byKey(const Key('lesson-emergency')));
     await t.pumpAndSettle();
-    expect(find.text('Emergency help'), findsOneWidget);
-    expect(find.text('What to bring'), findsOneWidget);
+    expect(find.text('Emergency care plan'), findsOneWidget);
+    expect(find.text('Need urgent help?'), findsOneWidget);
   });
 
   testWidgets('birth-plan: no warnings shows the one generic line and both buttons', (t) async {

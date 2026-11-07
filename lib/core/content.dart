@@ -176,6 +176,15 @@ const babySizes = <(int, Tx)>[
   (40, Tx('small watermelon', 'tikiti maji dogo')),
 ];
 
+/// The size stage a week belongs to (8, 12, 16 … 40): the picture ID is `SZ-<stage>`.
+int sizeStageWeek(int w) {
+  var s = babySizes.first.$1;
+  for (final x in babySizes) {
+    if (w >= x.$1) s = x.$1;
+  }
+  return s;
+}
+
 Tx sizeForWeek(int w) {
   var s = babySizes.first.$2;
   for (final x in babySizes) {

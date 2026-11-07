@@ -4,7 +4,6 @@ import '../../core/dates.dart';
 import '../../state/app_state.dart';
 import '../theme.dart';
 import '../widgets.dart';
-import 'caregiver_screen.dart';
 import 'lock_screen.dart';
 
 /// Onboarding (MA-01..MA-04): language, stage and dates, consent (all off), optional PIN.
@@ -16,7 +15,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int step = 0;
-  final name = TextEditingController();
+  late final name = TextEditingController(text: context.appRead.name); // pre-filled when her clinic set up the account
   final babyNames = List.generate(3, (_) => TextEditingController());
   int babyCount = 1;
   final clinic = TextEditingController();
@@ -25,11 +24,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String dateMode = 'weeks'; // weeks | lmp
   int weeksPreg = 12;
   DateTime? lmp, dob;
+  final contactName = TextEditingController();
+  final contactPhone = TextEditingController();
+  String pregType = 'single';
+  bool dataOk = false;
   final consents = {for (final k in consentKinds) k: false};
   String pin = '';
 
   bool get _canNext => switch (step) {
-    1 => name.text.trim().isNotEmpty && (stage == 'pregnant' ? (dateMode == 'weeks' || lmp != null) : dob != null),
+    0 => name.text.trim().isNotEmpty,
+    1 => stage == 'pregnant' ? (dateMode == 'weeks' || lmp != null) : dob != null,
+    3 => dataOk,
     _ => true,
   };
 
@@ -40,6 +45,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     final l = stage == 'pregnant' ? (dateMode == 'weeks' ? addDays(today(), -weeksPreg * 7) : lmp) : null;
     if (pin.length == 4) await s.setPin(pin);
+    await s.setDataConsent(true);
+    if (stage == 'pregnant') await s.setPregnancyType(pregType);
+    if (contactPhone.text.trim().isNotEmpty || clinicPhone.text.trim().isNotEmpty) {
+      await s.saveCarePlan({
+        'hospital_name': clinic.text,
+        'hospital_phone': clinicPhone.text,
+        'contact_name': contactName.text,
+        'contact_phone': contactPhone.text,
+      });
+    }
     await s.completeOnboarding(
       name: name.text,
       stage: stage,
@@ -48,8 +63,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       babyNames: [for (var i = 0; i < babyCount; i++) babyNames[i].text],
       consents: consents,
     );
-    // opened from the preview picker: go back to the root, which now shows the app
-    if (mounted && Navigator.of(context).canPop()) Navigator.of(context).popUntil((r) => r.isFirst);
   }
 
   Future<DateTime?> _pick(DateTime first, DateTime last) =>
@@ -57,87 +70,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final s = context.app;
-    final steps = [_welcome(s), _about(), _consent(), _pin()];
-    return Scaffold(
-      appBar: AppBar(
-        leading: step > 0 ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => step--)) : null,
-        title: Text('${step + 1} / ${steps.length}'),
-        actions: const [EmergencyButton()],
-      ),
-      body: SafeArea(child: steps[step]),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton(
-            key: const Key('ob-next'),
-            onPressed: !_canNext ? null : () => step < steps.length - 1 ? setState(() => step++) : _finish(),
-            child: Text(step < steps.length - 1 ? context.t('Continue', 'Endelea') : context.t('Start', 'Anza')),
+    final steps = [_name(), _about(), _contacts(), _consent(), _pin()];
+    return PopScope(
+      canPop: step == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && step > 0) setState(() => step--);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => step > 0 ? setState(() => step--) : Navigator.of(context).maybePop(),
+          ),
+          title: Padding(
+            padding: const EdgeInsets.only(right: Sp.sm),
+            child: StepProgress(step: step, total: steps.length),
+          ),
+          actions: const [EmergencyButton()],
+        ),
+        body: SafeArea(child: steps[step]),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: FilledButton(
+              key: const Key('ob-next'),
+              onPressed: !_canNext ? null : () => step < steps.length - 1 ? setState(() => step++) : _finish(),
+              child: Text(step < steps.length - 1 ? context.t('Continue', 'Endelea') : context.t('Start', 'Anza')),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _welcome(AppState s) => Pad(
+  Widget _name() => Pad(
     children: [
-      const Illus('mother_belly', height: 200),
-      const Gap(24),
-      Text('Safari ya Mama', style: Theme.of(context).textTheme.headlineSmall),
-      const Gap(8),
-      Text(
-        context.t(
-          'Your daily companion from the first month of pregnancy until your baby is 9 months old. A 1-minute check each day tells you when to get care.',
-          'Mwenzako wa kila siku kuanzia mwezi wa kwanza wa ujauzito hadi mtoto afikishe miezi 9. Ukaguzi wa dakika 1 kila siku unakuambia wakati wa kutafuta huduma.',
-        ),
-        style: Theme.of(context).textTheme.bodyLarge,
+      AppHeader(
+        context.t('About you', 'Kuhusu wewe'),
+        subtitle: context.t('So the app can greet you. Only a first name is needed.', 'Ili programu ikusalimie. Jina la kwanza linatosha.'),
       ),
-      const Gap(24),
-      Text(context.t('Choose your language', 'Chagua lugha yako'), style: Theme.of(context).textTheme.titleMedium),
-      const Gap(8),
-      Choice<String>(
-        keyPrefix: 'lang',
-        options: const [('sw', Icons.translate, 'Kiswahili'), ('en', Icons.translate, 'English')],
-        value: s.lang,
-        onChanged: s.setLang,
-      ),
-      const Gap(8),
-      Text(
-        context.t('Sudanese Arabic and Luganda are coming later.', 'Kiarabu cha Sudan na Luganda vinakuja baadaye.'),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-      const Gap(16),
-      AppCard(
-        color: C.surface2,
-        child: Text(
-          context.t(
-            'Safari ya Mama supports your health worker. It does not replace them and it cannot diagnose.',
-            'Safari ya Mama inamsaidia mhudumu wako wa afya. Haichukui nafasi yake na haiwezi kutoa utambuzi.',
-          ),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
-      const Gap(12),
-      TextButton.icon(
-        key: const Key('i-help-a-mother'),
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CaregiverJoinScreen())),
-        icon: const Icon(Icons.volunteer_activism_outlined),
-        label: Text(context.t('I help a mother (partner or family)', 'Ninamsaidia mama (mwenzi au familia)')),
+      TextField(
+        key: const Key('ob-name'),
+        controller: name,
+        onChanged: (_) => setState(() {}),
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(labelText: context.t('Your first name', 'Jina lako la kwanza')),
       ),
     ],
   );
 
   Widget _about() => Pad(
     children: [
-      Text(context.t('About you', 'Kuhusu wewe'), style: Theme.of(context).textTheme.headlineSmall),
-      const Gap(16),
-      TextField(
-        key: const Key('ob-name'),
-        controller: name,
-        onChanged: (_) => setState(() {}),
-        decoration: InputDecoration(labelText: context.t('Your first name', 'Jina lako la kwanza')),
+      AppHeader(
+        context.t('Your pregnancy', 'Ujauzito wako'),
+        subtitle: context.t('This sets your daily check and clinic dates.', 'Hii inaweka ukaguzi wako na tarehe za kliniki.'),
       ),
-      const Gap(24),
       Choice<String>(
         keyPrefix: 'stage',
         options: [
@@ -203,6 +191,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             );
           },
         ),
+        const Gap(Sp.lg),
+        Text(context.t('How many babies?', 'Watoto wangapi?'), style: Theme.of(context).textTheme.titleMedium),
+        const Gap(Sp.sm),
+        Wrap(
+          spacing: Sp.sm,
+          runSpacing: Sp.sm,
+          children: [
+            for (final (v, l) in [
+              ('single', context.t('One baby', 'Mtoto mmoja')),
+              ('twins', context.t('Twins', 'Pacha')),
+              ('multiple', context.t('More than two', 'Zaidi ya wawili')),
+              ('unknown', context.t('Not known yet', 'Bado sijui')),
+            ])
+              ChoiceChip(key: Key('ob-type-$v'), label: Text(l), selected: pregType == v, onSelected: (_) => setState(() => pregType = v)),
+          ],
+        ),
       ] else ...[
         OutlinedButton.icon(
           key: const Key('ob-dob'),
@@ -237,18 +241,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ],
-      const Gap(24),
-      Text(context.t('Your clinic (for emergency calls)', 'Kliniki yako (kwa simu za dharura)'), style: Theme.of(context).textTheme.titleMedium),
-      const Gap(8),
-      TextField(
-        controller: clinic,
-        decoration: InputDecoration(labelText: context.t('Clinic name (optional)', 'Jina la kliniki (si lazima)')),
+    ],
+  );
+
+  Widget _contacts() => Pad(
+    children: [
+      AppHeader(
+        context.t('Emergency contacts', 'Namba za dharura'),
+        subtitle: context.t(
+          'So they are one tap away in an emergency. Saved on this phone. You can skip this.',
+          'Ili ziwe karibu wakati wa dharura. Zinahifadhiwa kwenye simu hii. Unaweza kuruka.',
+        ),
       ),
-      const Gap(8),
       TextField(
+        key: const Key('ob-clinic'),
+        controller: clinic,
+        decoration: InputDecoration(labelText: context.t('Your clinic or hospital', 'Kliniki au hospitali yako')),
+      ),
+      const Gap(Sp.md),
+      TextField(
+        key: const Key('ob-clinic-phone'),
         controller: clinicPhone,
         keyboardType: TextInputType.phone,
-        decoration: InputDecoration(labelText: context.t('Clinic phone (optional)', 'Simu ya kliniki (si lazima)')),
+        decoration: InputDecoration(labelText: context.t('Clinic phone', 'Simu ya kliniki')),
+      ),
+      const Gap(Sp.lg),
+      TextField(
+        controller: contactName,
+        decoration: InputDecoration(labelText: context.t('Person to call (partner, family)', 'Mtu wa kumpigia (mwenzi, familia)')),
+      ),
+      const Gap(Sp.md),
+      TextField(
+        controller: contactPhone,
+        keyboardType: TextInputType.phone,
+        decoration: InputDecoration(labelText: context.t('Their phone', 'Simu yake')),
       ),
     ],
   );
@@ -306,7 +332,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ListenButton(context.t('Everything is off until you turn it on.', 'Kila kitu kimezimwa hadi uwashe.')),
           ],
         ),
-        const Gap(16),
+        const Gap(Sp.md),
+        AppCard(
+          color: C.primarySoft,
+          border: C.primary.withValues(alpha: .3),
+          padding: const EdgeInsets.fromLTRB(Sp.sm, Sp.xs, Sp.md, Sp.xs),
+          child: CheckboxListTile(
+            key: const Key('consent-data'),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            value: dataOk,
+            onChanged: (v) => setState(() => dataOk = v ?? false),
+            title: Text(
+              context.t(
+                'I agree that Safari ya Mama keeps my answers on this phone (required)',
+                'Nakubali Safari ya Mama ihifadhi majibu yangu kwenye simu hii (lazima)',
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            subtitle: Text(
+              context.t(
+                'Needed for the daily check to work. Nothing is shared unless you turn it on below.',
+                'Inahitajika ili ukaguzi ufanye kazi. Hakuna kinachoshirikiwa usipowasha hapa chini.',
+              ),
+            ),
+          ),
+        ),
+        SectionTitle(context.t('Optional', 'Si lazima')),
         for (final e in items.entries) ...[
           AppCard(
             padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),

@@ -1,3 +1,7 @@
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -46,7 +50,7 @@ class _BodyCheckScreenState extends State<BodyCheckScreen> {
                 const Gap(8),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(backgroundColor: C.red),
-                  onPressed: () => Navigator.of(context).pushNamed('/emergency'),
+                  onPressed: () => context.push(Routes.emergency),
                   icon: const Icon(Icons.emergency),
                   label: Text(context.t('Emergency help', 'Msaada wa dharura')),
                 ),
@@ -212,7 +216,7 @@ class _BodyAreaScreenState extends State<BodyAreaScreen> {
             if (result!.level == Level.red)
               FilledButton.icon(
                 style: FilledButton.styleFrom(backgroundColor: C.red, minimumSize: const Size.fromHeight(56)),
-                onPressed: () => Navigator.of(context).pushNamed('/emergency'),
+                onPressed: () => context.push(Routes.emergency),
                 icon: const Icon(Icons.emergency),
                 label: Text(context.t('What to do now', 'Nini cha kufanya sasa')),
               ),

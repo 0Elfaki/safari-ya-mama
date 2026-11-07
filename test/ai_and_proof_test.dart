@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:safari_ya_mama/state/app_scope.dart';
 import 'package:safari_ya_mama/core/assistant.g.dart';
 import 'package:safari_ya_mama/core/record_proof.dart';
 import 'package:safari_ya_mama/data/ai_client.dart';
@@ -35,13 +36,20 @@ void main() {
     t.view.physicalSize = const Size(1080, 2340);
     t.view.devicePixelRatio = 2.75;
     addTearDown(t.view.reset);
-    await t.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: s,
-        child: MaterialApp(
-          home: home,
-          routes: {'/emergency': (_) => const Scaffold(body: Text('EMERGENCY SCREEN'))},
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => home),
+        GoRoute(
+          path: '/emergency',
+          builder: (_, _) => const Scaffold(body: Text('EMERGENCY SCREEN')),
         ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await t.pumpWidget(
+      AppScope(
+        state: s,
+        child: MaterialApp.router(routerConfig: router),
       ),
     );
     await t.pumpAndSettle();

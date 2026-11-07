@@ -8,6 +8,8 @@ import '../theme.dart';
 import '../widgets.dart';
 import 'caregiver_screen.dart';
 import 'demo_picker_screen.dart';
+import 'doctor_note_screen.dart';
+import 'emergency_screen.dart';
 import 'library_screen.dart';
 import 'lock_screen.dart';
 import 'record_proof_screen.dart';
@@ -43,11 +45,24 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         SectionTitle(context.t('Language', 'Lugha')),
-        Choice<String>(
-          keyPrefix: 'plang',
-          options: const [('sw', Icons.translate, 'Kiswahili'), ('en', Icons.translate, 'English')],
-          value: s.lang,
-          onChanged: s.setLang,
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<String>(
+            key: const Key('plang'),
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(
+                value: 'sw',
+                label: Text('Kiswahili', key: Key('plang-sw')),
+              ),
+              ButtonSegment(
+                value: 'en',
+                label: Text('English', key: Key('plang-en')),
+              ),
+            ],
+            selected: {s.lang},
+            onSelectionChanged: (v) => s.setLang(v.first),
+          ),
         ),
         SectionTitle(context.t('My clinic', 'Kliniki yangu')),
         AppCard(
@@ -71,6 +86,29 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () => go(const SignInScreen()),
                 ),
               ],
+            ],
+          ),
+        ),
+        SectionTitle(context.t('Care and safety', 'Huduma na usalama')),
+        AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: Sp.md, vertical: Sp.xs),
+          child: Column(
+            children: [
+              Row2(
+                key: const Key('profile-contacts'),
+                icon: Icons.contact_phone_outlined,
+                tint: C.red,
+                title: context.t('Emergency contacts', 'Namba za dharura'),
+                sub: context.t('Facility, a person to call, transport', 'Kituo, mtu wa kumpigia, usafiri'),
+                onTap: () => go(const EmergencyContactsScreen()),
+              ),
+              Row2(
+                key: const Key('profile-note'),
+                icon: Icons.description_outlined,
+                title: context.t("Doctor's Note", 'Taarifa kwa daktari'),
+                sub: context.t('A summary to show your clinician', 'Muhtasari wa kumwonyesha mhudumu'),
+                onTap: () => go(const DoctorNoteScreen()),
+              ),
             ],
           ),
         ),

@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'app.dart';
+import 'app/app.dart';
+import 'app/providers.dart';
 import 'config.dart';
 import 'core/content_assets.dart';
 import 'data/local_store.dart';
@@ -43,5 +44,5 @@ Future<void> main() async {
   if (q['a11y'] == '1') SemanticsBinding.instance.ensureSemantics();
   if (state.hasPin) state.locked = true;
 
-  runApp(ChangeNotifierProvider.value(value: state, child: const SafariYaMamaApp()));
+  runApp(ProviderScope(overrides: [appStateProvider.overrideWith((ref) => state)], child: const SafariYaMamaApp()));
 }

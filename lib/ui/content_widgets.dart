@@ -11,7 +11,10 @@ class ContentPicture extends StatelessWidget {
   final double? height;
   final BoxFit fit;
   final double radius;
-  const ContentPicture(this.id, {super.key, required this.fallback, this.height, this.fit = BoxFit.cover, this.radius = 16});
+
+  /// What the picture shows, for screen readers. Without it the picture is decorative.
+  final String? semanticLabel;
+  const ContentPicture(this.id, {super.key, required this.fallback, this.height, this.fit = BoxFit.cover, this.radius = 16, this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,16 @@ class ContentPicture extends StatelessWidget {
     if (a == null || a.path.isEmpty || a.type == 'video') return fallback;
     final img = a.path.endsWith('.svg')
         ? SvgPicture.asset(a.path, fit: fit, height: height)
-        : Image.asset(a.path, fit: fit, height: height, width: double.infinity, gaplessPlayback: true, errorBuilder: (_, _, _) => fallback);
+        : Image.asset(
+            a.path,
+            fit: fit,
+            height: height,
+            width: double.infinity,
+            gaplessPlayback: true,
+            semanticLabel: semanticLabel,
+            excludeFromSemantics: semanticLabel == null,
+            errorBuilder: (_, _, _) => fallback,
+          );
     return ClipRRect(
       key: Key('content-$id'),
       borderRadius: BorderRadius.circular(radius),

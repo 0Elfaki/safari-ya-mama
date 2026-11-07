@@ -1,0 +1,653 @@
+{
+  "version": 1,
+  "about": "Mothers' circle content check, layer 1 (rules). One file used by the server (supabase/functions/community) and the app (assets/content/community_rules.json, a byte-for-byte copy checked by test/community_test.dart). A term matches at the start of a word, so 'stop' also matches 'stopped'. A rule matches when every group in 'all' has a term in the same sentence and no 'unless' term is there.",
+  "handle": {
+    "about": "Community names (usernames). 3 to 20 characters: letters, numbers, '_' or '.', starting with a letter, at most 4 numbers (no phone numbers). Two names are the same when they match after lower-casing, removing '_' and '.', and reading 0 3 4 5 7 8 as o e a s t b and 1, i, l as one letter, so nobody can copy another mother's name or pose as staff.",
+    "min": 3,
+    "max": 20,
+    "max_digits": 4,
+    "reserved_contains": [
+      "admin",
+      "moderator",
+      "safari",
+      "official",
+      "support",
+      "doctor",
+      "daktari",
+      "nurse",
+      "muuguzi",
+      "mhudumu",
+      "midwife",
+      "mkunga",
+      "clinic",
+      "kliniki",
+      "hospital",
+      "hospitali",
+      "staff",
+      "mamabot",
+      "ministry",
+      "wizara",
+      "govt",
+      "serikali"
+    ],
+    "reserved_prefix": [
+      "dr",
+      "mod",
+      "team",
+      "dkt"
+    ],
+    "offensive": [
+      "stupid",
+      "idiot",
+      "fool",
+      "dumb",
+      "ugly",
+      "whore",
+      "slut",
+      "bitch",
+      "sex",
+      "porn",
+      "kill",
+      "mjinga",
+      "mpumbavu",
+      "pumbavu",
+      "malaya",
+      "shenzi",
+      "kuma",
+      "msenge",
+      "kahaba",
+      "fala",
+      "mavi"
+    ]
+  },
+  "urgent": [
+    "bleeding",
+    "heavy bleeding",
+    "fits",
+    "convulsion",
+    "seizure",
+    "unconscious",
+    "fainted",
+    "fainting",
+    "not breathing",
+    "can't breathe",
+    "cannot breathe",
+    "blurred vision",
+    "severe headache",
+    "water broke",
+    "waters broke",
+    "baby not moving",
+    "stopped moving",
+    "not moving",
+    "kill myself",
+    "suicide",
+    "end my life",
+    "harm my baby",
+    "hurt myself",
+    "kutokwa damu",
+    "natoka damu",
+    "anatoka damu",
+    "degedege",
+    "kifafa",
+    "amezimia",
+    "nimezimia",
+    "kuzimia",
+    "hapumui",
+    "hawezi kupumua",
+    "kichwa kinauma sana",
+    "maji yamevunjika",
+    "hachezi",
+    "kujiua",
+    "nataka kufa",
+    "kumdhuru mtoto"
+  ],
+  "abuse": [
+    "stupid",
+    "idiot",
+    "fool",
+    "dumb",
+    "shut up",
+    "ugly",
+    "whore",
+    "slut",
+    "bitch",
+    "useless woman",
+    "mjinga",
+    "mpumbavu",
+    "pumbavu",
+    "malaya",
+    "shenzi",
+    "kuma",
+    "msenge",
+    "mbwa wewe",
+    "kahaba",
+    "fala"
+  ],
+  "selling": [
+    "buy now",
+    "order now",
+    "for sale",
+    "price",
+    "discount",
+    "sell",
+    "selling",
+    "whatsapp me",
+    "inbox me",
+    "dm me",
+    "call me",
+    "send money",
+    "mpesa",
+    "m-pesa",
+    "tigo pesa",
+    "airtel money",
+    "nunua",
+    "bei",
+    "punguzo",
+    "nauza",
+    "tuma pesa",
+    "nipigie",
+    "ni-dm"
+  ],
+  "miracle": [
+    "miracle",
+    "guaranteed",
+    "100%",
+    "cures",
+    "cure all",
+    "secret cure",
+    "doctors don't want",
+    "muujiza",
+    "tiba ya uhakika",
+    "inaponya kila",
+    "huponya kila",
+    "dawa ya siri",
+    "uhakika asilimia mia"
+  ],
+  "medical_terms": [
+    "medicine",
+    "drug",
+    "tablet",
+    "pill",
+    "injection",
+    "herb",
+    "herbal",
+    "dose",
+    "antibiotic",
+    "painkiller",
+    "panadol",
+    "dawa",
+    "vidonge",
+    "kidonge",
+    "sindano",
+    "mitishamba",
+    "kienyeji",
+    "dozi",
+    "mgonjwa"
+  ],
+  "question_starts": [
+    "is it true",
+    "is it ok",
+    "is it okay",
+    "is it safe",
+    "can i",
+    "should i",
+    "can a",
+    "should a",
+    "does",
+    "do i",
+    "is",
+    "are",
+    "how",
+    "what",
+    "why",
+    "when",
+    "je",
+    "ni kweli",
+    "naweza",
+    "inafaa",
+    "nifanye",
+    "kwa nini",
+    "vipi",
+    "ni salama",
+    "ni sawa"
+  ],
+  "myths": [
+    {
+      "id": "stop-iron",
+      "all": [
+        [
+          "stop",
+          "don't take",
+          "dont take",
+          "do not take",
+          "no need to take",
+          "avoid",
+          "acha",
+          "kuacha",
+          "usimeze",
+          "usitumie",
+          "nimeacha"
+        ],
+        [
+          "iron",
+          "folic",
+          "ferrous",
+          "fefol",
+          "vidonge vya damu",
+          "madini chuma",
+          "vidonge vya kuongeza damu"
+        ]
+      ],
+      "unless": [
+        "don't stop",
+        "do not stop",
+        "never stop",
+        "keep taking",
+        "usiache",
+        "endelea kumeza"
+      ],
+      "fact": {
+        "en": "Iron and folic acid tablets protect you and your baby from anaemia. Take one every day for the whole pregnancy. If they upset your stomach, take them with food and tell your nurse.",
+        "sw": "Vidonge vya madini chuma na folic vinakulinda wewe na mtoto dhidi ya upungufu wa damu. Meza kimoja kila siku katika ujauzito wote. Vikikusumbua tumbo, mezea na chakula na mwambie muuguzi."
+      }
+    },
+    {
+      "id": "skip-clinic",
+      "all": [
+        [
+          "no need",
+          "don't need",
+          "dont need",
+          "do not need",
+          "skip",
+          "waste of time",
+          "not necessary",
+          "pointless",
+          "hakuna haja",
+          "usiende",
+          "si lazima",
+          "haina maana",
+          "kupoteza muda"
+        ],
+        [
+          "clinic",
+          "hospital",
+          "antenatal",
+          "anc",
+          "health centre",
+          "health center",
+          "kliniki",
+          "hospitali",
+          "zahanati",
+          "kituo cha afya"
+        ]
+      ],
+      "fact": {
+        "en": "Clinic visits find problems like high blood pressure and anaemia before you feel them. WHO advises at least 8 antenatal contacts, even when you feel well.",
+        "sw": "Kliniki hugundua matatizo kama shinikizo la damu na upungufu wa damu kabla hujayahisi. WHO inashauri angalau mahudhurio 8 ya kliniki ya ujauzito, hata ukijisikia vizuri."
+      }
+    },
+    {
+      "id": "herbs-labour",
+      "all": [
+        [
+          "herb",
+          "herbal",
+          "mitishamba",
+          "dawa za kienyeji",
+          "dawa ya kienyeji",
+          "traditional medicine",
+          "castor oil",
+          "local medicine",
+          "mganga"
+        ],
+        [
+          "labour",
+          "labor",
+          "delivery",
+          "deliver",
+          "contraction",
+          "push",
+          "uchungu",
+          "kujifungua",
+          "kuzaa",
+          "mlango wa kizazi",
+          "speed up",
+          "induce",
+          "harakisha"
+        ]
+      ],
+      "fact": {
+        "en": "Herbs to start or speed up labour can make the womb squeeze too hard and tear, and can harm the baby. Give birth at a health facility, where labour is watched safely.",
+        "sw": "Dawa za mitishamba za kuanzisha au kuharakisha uchungu zinaweza kufanya mji wa mimba ubane sana na kupasuka, na kumdhuru mtoto. Jifungulie kituo cha afya ambapo uchungu unaangaliwa kwa usalama."
+      }
+    },
+    {
+      "id": "water-early",
+      "all": [
+        [
+          "give",
+          "gave",
+          "giving",
+          "feed",
+          "mpe",
+          "nimpe",
+          "ampe",
+          "wampe",
+          "kumpa",
+          "nimempa",
+          "tunampa",
+          "anapewa",
+          "mpa"
+        ],
+        [
+          "water",
+          "maji",
+          "glucose",
+          "gripe water",
+          "porridge",
+          "uji",
+          "juice",
+          "cow milk",
+          "cow's milk",
+          "maziwa ya ng'ombe",
+          "tea",
+          "chai"
+        ],
+        [
+          "newborn",
+          "new born",
+          "mchanga",
+          "weeks old",
+          "days old",
+          "week old",
+          "wiki",
+          "siku",
+          "1 month",
+          "2 months",
+          "3 months",
+          "4 months",
+          "5 months",
+          "one month",
+          "two months",
+          "three months",
+          "four months",
+          "five months",
+          "mwezi mmoja",
+          "miezi miwili",
+          "miezi mitatu",
+          "miezi minne",
+          "miezi mitano"
+        ]
+      ],
+      "unless": [
+        "don't give",
+        "do not give",
+        "never give",
+        "usimpe",
+        "asipewe",
+        "only breast milk",
+        "maziwa ya mama pekee"
+      ],
+      "fact": {
+        "en": "For the first 6 months a baby needs only breast milk: no water, tea, porridge or other milk, even in hot weather. Breast milk is already mostly water. Other drinks can bring diarrhoea.",
+        "sw": "Kwa miezi 6 ya kwanza mtoto anahitaji maziwa ya mama pekee: bila maji, chai, uji wala maziwa mengine, hata wakati wa joto. Maziwa ya mama yana maji ya kutosha. Vinywaji vingine vinaweza kuleta kuharisha."
+      }
+    },
+    {
+      "id": "cord-dressing",
+      "all": [
+        [
+          "cord",
+          "kitovu",
+          "navel",
+          "belly button"
+        ],
+        [
+          "cow dung",
+          "dung",
+          "mavi",
+          "ash",
+          "majivu",
+          "herb",
+          "mitishamba",
+          "oil",
+          "mafuta",
+          "powder",
+          "poda",
+          "toothpaste",
+          "dawa ya meno",
+          "soil",
+          "udongo",
+          "spit",
+          "mate",
+          "coin",
+          "sarafu"
+        ]
+      ],
+      "unless": [
+        "don't put",
+        "do not put",
+        "never put",
+        "nothing on",
+        "usiweke",
+        "usipake"
+      ],
+      "fact": {
+        "en": "Keep the cord clean and dry and leave it uncovered. Put nothing on it unless your nurse gave you chlorhexidine. Dung, ash, oil or powder can cause a deadly infection.",
+        "sw": "Weka kitovu kisafi na kikavu, bila kufunika. Usiweke chochote isipokuwa chlorhexidine uliyopewa na muuguzi. Mavi, majivu, mafuta au poda vinaweza kuleta maambukizi hatari."
+      }
+    },
+    {
+      "id": "colostrum",
+      "all": [
+        [
+          "colostrum",
+          "first milk",
+          "yellow milk",
+          "maziwa ya kwanza",
+          "maziwa ya njano",
+          "maziwa ya mwanzo"
+        ],
+        [
+          "throw",
+          "discard",
+          "dirty",
+          "bad",
+          "squeeze out",
+          "don't give",
+          "dont give",
+          "mwaga",
+          "chafu",
+          "mabaya",
+          "usimpe",
+          "kamua utupe"
+        ]
+      ],
+      "fact": {
+        "en": "The first yellow milk (colostrum) is the baby's first protection against illness. Give it to the baby within the first hour after birth. Do not throw it away.",
+        "sw": "Maziwa ya kwanza ya njano ni kinga ya kwanza ya mtoto dhidi ya magonjwa. Mpe mtoto ndani ya saa moja baada ya kuzaliwa. Usiyamwage."
+      }
+    },
+    {
+      "id": "vaccine-fear",
+      "all": [
+        [
+          "vaccine",
+          "vaccination",
+          "immunization",
+          "immunisation",
+          "jab",
+          "chanjo"
+        ],
+        [
+          "cause",
+          "dangerous",
+          "harm",
+          "infertil",
+          "utasa",
+          "kill",
+          "autism",
+          "poison",
+          "sumu",
+          "hatari",
+          "not needed",
+          "useless",
+          "fake",
+          "haina faida",
+          "si salama",
+          "inaua",
+          "zinaua"
+        ]
+      ],
+      "unless": [
+        "safe",
+        "salama",
+        "protect",
+        "kinga",
+        "linda"
+      ],
+      "fact": {
+        "en": "Vaccines are safe and protect babies from measles, polio, pneumonia and other killers. A small fever or a sore leg for a day or two is normal. Keep every vaccine date on the clinic card.",
+        "sw": "Chanjo ni salama na zinamlinda mtoto dhidi ya surua, polio, nimonia na magonjwa mengine hatari. Homa kidogo au mguu kuuma kwa siku moja au mbili ni kawaida. Fuata tarehe zote za chanjo kwenye kadi ya kliniki."
+      }
+    },
+    {
+      "id": "alcohol",
+      "all": [
+        [
+          "alcohol",
+          "beer",
+          "pombe",
+          "bia",
+          "wine",
+          "mvinyo",
+          "gongo",
+          "local brew",
+          "spirits",
+          "konyagi"
+        ],
+        [
+          "milk",
+          "breast",
+          "pregnan",
+          "mimba",
+          "maziwa",
+          "nyonyesha",
+          "ujauzito",
+          "baby",
+          "mtoto"
+        ]
+      ],
+      "unless": [
+        "avoid",
+        "don't drink",
+        "do not drink",
+        "never",
+        "no alcohol",
+        "usinywe",
+        "epuka",
+        "bila pombe",
+        "harm",
+        "hatari"
+      ],
+      "fact": {
+        "en": "No amount of alcohol is safe in pregnancy, and alcohol does not make more breast milk. It passes to the baby. Frequent breastfeeding is what makes more milk.",
+        "sw": "Hakuna kiasi cha pombe kilicho salama wakati wa ujauzito, na pombe haiongezi maziwa. Inamfikia mtoto. Kunyonyesha mara nyingi ndiko kunakoongeza maziwa."
+      }
+    },
+    {
+      "id": "honey-baby",
+      "all": [
+        [
+          "honey",
+          "asali"
+        ],
+        [
+          "baby",
+          "newborn",
+          "infant",
+          "mtoto",
+          "mchanga",
+          "kichanga"
+        ]
+      ],
+      "unless": [
+        "no honey",
+        "don't give",
+        "do not give",
+        "never give",
+        "usimpe",
+        "after 1 year",
+        "after one year",
+        "baada ya mwaka"
+      ],
+      "fact": {
+        "en": "Do not give honey to a baby under 1 year old. It can carry germs that cause a serious illness (botulism) in babies.",
+        "sw": "Usimpe mtoto chini ya mwaka 1 asali. Inaweza kuwa na vijidudu vinavyoleta ugonjwa hatari kwa watoto wachanga."
+      }
+    },
+    {
+      "id": "eat-less",
+      "all": [
+        [
+          "eat less",
+          "eating less",
+          "don't eat",
+          "avoid eggs",
+          "no eggs",
+          "avoid meat",
+          "kula kidogo",
+          "usile",
+          "usile mayai",
+          "acha kula"
+        ],
+        [
+          "pregnan",
+          "mimba",
+          "ujauzito",
+          "small baby",
+          "easy delivery",
+          "mtoto mdogo",
+          "kujifungua rahisi"
+        ]
+      ],
+      "fact": {
+        "en": "Eating less to keep the baby small is not safe: it can bring a weak baby and anaemia. Eat an extra small meal each day, including eggs, beans, fish, greens and fruit.",
+        "sw": "Kula kidogo ili mtoto awe mdogo si salama: kunaweza kuleta mtoto dhaifu na upungufu wa damu. Ongeza mlo mdogo mmoja kila siku, ikiwemo mayai, maharage, samaki, mboga za majani na matunda."
+      }
+    },
+    {
+      "id": "stop-arv",
+      "all": [
+        [
+          "stop",
+          "don't take",
+          "dont take",
+          "avoid",
+          "acha",
+          "usimeze",
+          "kuacha"
+        ],
+        [
+          "arv",
+          "arvs",
+          "antiretroviral",
+          "hiv medicine",
+          "dawa za kufubaza",
+          "dawa za vvu"
+        ]
+      ],
+      "unless": [
+        "don't stop",
+        "do not stop",
+        "never stop",
+        "usiache"
+      ],
+      "fact": {
+        "en": "Mothers living with HIV should keep taking their ARVs every day in pregnancy and while breastfeeding. This protects the mother and almost always keeps the baby free of HIV.",
+        "sw": "Mama anayeishi na VVU aendelee kumeza ARV kila siku wakati wa ujauzito na kunyonyesha. Hii inamlinda mama na karibu kila mara humkinga mtoto dhidi ya VVU."
+      }
+    }
+  ]
+}

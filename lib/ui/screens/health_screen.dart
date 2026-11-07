@@ -9,6 +9,7 @@ import 'birth_plan_screen.dart';
 import 'child_profile_screen.dart';
 import 'bp_screen.dart';
 import 'journal_screen.dart';
+import 'journey_screen.dart';
 import 'library_screen.dart';
 import 'nutrition_screen.dart';
 
@@ -52,6 +53,7 @@ class _HealthScreenState extends State<HealthScreen> {
       final contacts = b == null ? const <({ChildContact contact, DateTime due, bool done})>[] : s.childContactsFor(b['id'] as String);
       return Pad(
         children: [
+          const MotherTools(),
           if (s.babies.length > 1) const BabySwitcher(),
           Text(context.t('Month by month', 'Mwezi kwa mwezi'), style: Theme.of(context).textTheme.headlineSmall),
           const Gap(12),
@@ -135,6 +137,7 @@ class _HealthScreenState extends State<HealthScreen> {
     final pm = pregnancyMonths[m]!;
     return Pad(
       children: [
+        const MotherTools(),
         Text(context.t('Month by month', 'Mwezi kwa mwezi'), style: Theme.of(context).textTheme.headlineSmall),
         const Gap(12),
         MonthChips(current: s.month, selected: m, onSelected: (i) => setState(() => month = i)),

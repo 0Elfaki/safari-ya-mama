@@ -1,3 +1,7 @@
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../core/content.dart';
@@ -120,7 +124,7 @@ class _BpScreenState extends State<BpScreen> {
               const Gap(8),
               FilledButton.icon(
                 style: FilledButton.styleFrom(backgroundColor: C.red),
-                onPressed: () => Navigator.of(context).pushNamed('/emergency'),
+                onPressed: () => context.push(Routes.emergency),
                 icon: const Icon(Icons.emergency),
                 label: Text(context.t('What to do now', 'Nini cha kufanya sasa')),
               ),

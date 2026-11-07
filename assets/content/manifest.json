@@ -1,1 +1,386 @@
-{"version": 1, "generated_by": "tools/import_content.mjs", "assets": {}}
+{
+  "version": 1,
+  "generated_by": "picture import 2026-11-07",
+  "assets": {
+    "BF-EXP-P1": {
+      "type": "picture",
+      "file": "pictures/BF-EXP-P1.webp",
+      "source": "BF-EXP-P1.jpg"
+    },
+    "BF-EXP-P2": {
+      "type": "picture",
+      "file": "pictures/BF-EXP-P2.webp",
+      "source": "BF-EXP-P2.jpg"
+    },
+    "BF-EXP-P4": {
+      "type": "picture",
+      "file": "pictures/BF-EXP-P4.webp",
+      "source": "Father_feeding_baby_with_cup_1a3c81b6.jpg"
+    },
+    "BF-FIRST-P1": {
+      "type": "picture",
+      "file": "pictures/BF-FIRST-P1.webp",
+      "source": "BF-FIRST-P1.jpg"
+    },
+    "BF-FIRST-P2": {
+      "type": "picture",
+      "file": "pictures/BF-FIRST-P2.webp",
+      "source": "BF-FIRST-P2.jpg"
+    },
+    "BF-FIRST-P3": {
+      "type": "picture",
+      "file": "pictures/BF-FIRST-P3.webp",
+      "source": "BF-FIRST-P3.jpg"
+    },
+    "BF-FIRST-P4": {
+      "type": "picture",
+      "file": "pictures/BF-FIRST-P4.webp",
+      "source": "BF-FIRST-P4.jpg"
+    },
+    "BF-LATCH-P1": {
+      "type": "picture",
+      "file": "pictures/BF-LATCH-P1.webp",
+      "source": "BF-LATCH-P1.jpg"
+    },
+    "BF-POS-P1": {
+      "type": "picture",
+      "file": "pictures/BF-POS-P1.webp",
+      "source": "Mother_breastfeeding_baby_e0c3bcad.jpg"
+    },
+    "BF-SOLIDS-P1": {
+      "type": "picture",
+      "file": "pictures/BF-SOLIDS-P1.webp",
+      "source": "Mother_breastfeeding_child_ef3aa2c1.jpg"
+    },
+    "BF-SOLIDS-P2": {
+      "type": "picture",
+      "file": "pictures/BF-SOLIDS-P2.webp",
+      "source": "Pot_of_porridge_with_powder_0d4af8ab.jpg"
+    },
+    "BF-SOLIDS-P3": {
+      "type": "picture",
+      "file": "pictures/BF-SOLIDS-P3.webp",
+      "source": "People_serving_food_in_bowls_9b407619.jpg"
+    },
+    "BF-SOLIDS-P4": {
+      "type": "picture",
+      "file": "pictures/BF-SOLIDS-P4.webp",
+      "source": "Mother_washes_hands_next_to_1118c7dc.jpg"
+    },
+    "BOOK-CLINIC": {
+      "type": "picture",
+      "file": "pictures/BOOK-CLINIC.webp",
+      "source": "BOOK-CLINIC.jpg"
+    },
+    "BOOK-VIDEO": {
+      "type": "picture",
+      "file": "pictures/BOOK-VIDEO.webp",
+      "source": "BOOK-VIDEO.jpg"
+    },
+    "COMM-HERO": {
+      "type": "picture",
+      "file": "pictures/COMM-HERO.webp",
+      "source": "COMM-HERO.jpg"
+    },
+    "HERO-WELCOME": {
+      "type": "picture",
+      "file": "pictures/HERO-WELCOME.webp",
+      "source": "HERO-WELCOME.jpg"
+    },
+    "HOME-ASK": {
+      "type": "picture",
+      "file": "pictures/HOME-ASK.webp",
+      "source": "HOME-ASK.jpg"
+    },
+    "HOME-CARE": {
+      "type": "picture",
+      "file": "pictures/HOME-CARE.webp",
+      "source": "HOME-CARE.jpg"
+    },
+    "HOME-CIRCLE": {
+      "type": "picture",
+      "file": "pictures/HOME-CIRCLE.webp",
+      "source": "HOME-CIRCLE.jpg"
+    },
+    "HOME-DOCTOR": {
+      "type": "picture",
+      "file": "pictures/HOME-DOCTOR.webp",
+      "source": "HOME-DOCTOR.jpg"
+    },
+    "NB-CORD-P2": {
+      "type": "picture",
+      "file": "pictures/NB-CORD-P2.webp",
+      "source": "NB-CORD-P2.jpg"
+    },
+    "NB-CORD-P4": {
+      "type": "picture",
+      "file": "pictures/NB-CORD-P4.webp",
+      "source": "Mother_showing_baby_to_worker_52fddb8e.jpg"
+    },
+    "NB-DANGER-P3": {
+      "type": "picture",
+      "file": "pictures/NB-DANGER-P3.webp",
+      "source": "NB-DANGER-P3.jpg"
+    },
+    "NB-DANGER-P4": {
+      "type": "picture",
+      "file": "pictures/NB-DANGER-P4.webp",
+      "source": "NB-DANGER-P4.jpg"
+    },
+    "NB-HYG-P1": {
+      "type": "picture",
+      "file": "pictures/NB-HYG-P1.webp",
+      "source": "Hands_washing_under_tippy_tap_c8546518.jpg"
+    },
+    "NB-HYG-P3": {
+      "type": "picture",
+      "file": "pictures/NB-HYG-P3.webp",
+      "source": "People_drying_cups_in_sun_75e0be57 (1).jpg"
+    },
+    "NB-HYG-P4": {
+      "type": "picture",
+      "file": "pictures/NB-HYG-P4.webp",
+      "source": "Mother_and_baby_sleeping_under_84abac3a.jpg"
+    },
+    "NB-SLEEP-P1": {
+      "type": "picture",
+      "file": "pictures/NB-SLEEP-P1.webp",
+      "source": "Baby_sleeping_on_firm_mattress_f876e523.jpg"
+    },
+    "NB-SLEEP-P3": {
+      "type": "picture",
+      "file": "pictures/NB-SLEEP-P3.webp",
+      "source": "Baby_sleeping_under_mosquito_net_9e6d9590.jpg"
+    },
+    "NB-SLEEP-P4": {
+      "type": "picture",
+      "file": "pictures/NB-SLEEP-P4.webp",
+      "source": "House_exterior_with_open_windows_7b77e5c2 (1).jpg"
+    },
+    "NB-WARM-P1": {
+      "type": "picture",
+      "file": "pictures/NB-WARM-P1.webp",
+      "source": "Midwife_places_newborn_on_mother_08e265d9.jpg"
+    },
+    "NB-WARM-P3": {
+      "type": "picture",
+      "file": "pictures/NB-WARM-P3.webp",
+      "source": "NB-WARM-P3.jpg"
+    },
+    "NB-WARM-P4": {
+      "type": "picture",
+      "file": "pictures/NB-WARM-P4.webp",
+      "source": "NB-WARM-P4.jpg"
+    },
+    "NU-EAT-P1": {
+      "type": "picture",
+      "file": "pictures/NU-EAT-P1.webp",
+      "source": "NU-EAT-P1.jpg"
+    },
+    "NU-EAT-P2": {
+      "type": "picture",
+      "file": "pictures/NU-EAT-P2.webp",
+      "source": "NU-EAT-P2.jpg"
+    },
+    "NU-EAT-P4": {
+      "type": "picture",
+      "file": "pictures/NU-EAT-P4.webp",
+      "source": "NU-EAT-P4.jpg"
+    },
+    "NU-IFA-P2": {
+      "type": "picture",
+      "file": "pictures/NU-IFA-P2.webp",
+      "source": "NU-IFA-P2.jpg"
+    },
+    "NU-IFA-P3": {
+      "type": "picture",
+      "file": "pictures/NU-IFA-P3.webp",
+      "source": "NU-IFA-P3.jpg"
+    },
+    "NU-MOOD-P2": {
+      "type": "picture",
+      "file": "pictures/NU-MOOD-P2.webp",
+      "source": "NU-MOOD-P2.jpg"
+    },
+    "NU-MOOD-P3": {
+      "type": "picture",
+      "file": "pictures/NU-MOOD-P3.webp",
+      "source": "NU-MOOD-P3.jpg"
+    },
+    "NU-MOOD-P4": {
+      "type": "picture",
+      "file": "pictures/NU-MOOD-P4.webp",
+      "source": "NU-MOOD-P4.jpg"
+    },
+    "NU-SPACE-P1": {
+      "type": "picture",
+      "file": "pictures/NU-SPACE-P1.webp",
+      "source": "NU-SPACE-P1.jpg"
+    },
+    "NU-SPACE-P2": {
+      "type": "picture",
+      "file": "pictures/NU-SPACE-P2.webp",
+      "source": "NU-SPACE-P2.jpg"
+    },
+    "NU-SPACE-P3": {
+      "type": "picture",
+      "file": "pictures/NU-SPACE-P3.webp",
+      "source": "NU-SPACE-P3.jpg"
+    },
+    "NU-SPACE-P4": {
+      "type": "picture",
+      "file": "pictures/NU-SPACE-P4.webp",
+      "source": "NU-SPACE-P4.jpg"
+    },
+    "ONB-SIGNIN": {
+      "type": "picture",
+      "file": "pictures/ONB-SIGNIN.webp",
+      "source": "ONB-SIGNIN.jpg"
+    },
+    "PR-BP-P1": {
+      "type": "picture",
+      "file": "pictures/PR-BP-P1.webp",
+      "source": "PR-BP-P1.jpg"
+    },
+    "PR-BP-P3": {
+      "type": "picture",
+      "file": "pictures/PR-BP-P3.webp",
+      "source": "PR-BP-P3.jpg"
+    },
+    "PR-BP-P4": {
+      "type": "picture",
+      "file": "pictures/PR-BP-P4.webp",
+      "source": "PR-BP-P4.jpg"
+    },
+    "PR-DANGER-P1": {
+      "type": "picture",
+      "file": "pictures/PR-DANGER-P1.webp",
+      "source": "PR-DANGER-P1.jpg"
+    },
+    "PR-DANGER-P2": {
+      "type": "picture",
+      "file": "pictures/PR-DANGER-P2.webp",
+      "source": "PR-DANGER-P2.jpg"
+    },
+    "PR-DANGER-P3": {
+      "type": "picture",
+      "file": "pictures/PR-DANGER-P3.webp",
+      "source": "PR-DANGER-P3.jpg"
+    },
+    "PR-DANGER-P4": {
+      "type": "picture",
+      "file": "pictures/PR-DANGER-P4.webp",
+      "source": "PR-DANGER-P4.jpg"
+    },
+    "PR-KICKS-P1": {
+      "type": "picture",
+      "file": "pictures/PR-KICKS-P1.webp",
+      "source": "PR-KICKS-P1.jpg"
+    },
+    "PR-KICKS-P2": {
+      "type": "picture",
+      "file": "pictures/PR-KICKS-P2.webp",
+      "source": "PR-KICKS-P2.jpg"
+    },
+    "PR-KICKS-P4": {
+      "type": "picture",
+      "file": "pictures/PR-KICKS-P4.webp",
+      "source": "PR-KICKS-P4.jpg"
+    },
+    "PR-LABOUR-P1": {
+      "type": "picture",
+      "file": "pictures/PR-LABOUR-P1.webp",
+      "source": "PR-LABOUR-P1.jpg"
+    },
+    "PR-LABOUR-P3": {
+      "type": "picture",
+      "file": "pictures/PR-LABOUR-P3.webp",
+      "source": "PR-LABOUR-P3.jpg"
+    },
+    "PR-LABOUR-P4": {
+      "type": "picture",
+      "file": "pictures/PR-LABOUR-P4.webp",
+      "source": "PR-LABOUR-P4.jpg"
+    },
+    "PR-PLAN-P1": {
+      "type": "picture",
+      "file": "pictures/PR-PLAN-P1.webp",
+      "source": "PR-PLAN-P1.jpg"
+    },
+    "PR-PLAN-P2": {
+      "type": "picture",
+      "file": "pictures/PR-PLAN-P2.webp",
+      "source": "PR-PLAN-P2.jpg"
+    },
+    "PR-PLAN-P3": {
+      "type": "picture",
+      "file": "pictures/PR-PLAN-P3.webp",
+      "source": "PR-PLAN-P3.jpg"
+    },
+    "PR-PLAN-P4": {
+      "type": "picture",
+      "file": "pictures/PR-PLAN-P4.webp",
+      "source": "PR-PLAN-P4.jpg"
+    },
+    "PR-SLEEP-P1": {
+      "type": "picture",
+      "file": "pictures/PR-SLEEP-P1.webp",
+      "source": "PR-SLEEP-P1.jpg"
+    },
+    "PR-SLEEP-P3": {
+      "type": "picture",
+      "file": "pictures/PR-SLEEP-P3.webp",
+      "source": "PR-SLEEP-P3.jpg"
+    },
+    "PR-SLEEP-P4": {
+      "type": "picture",
+      "file": "pictures/PR-SLEEP-P4.webp",
+      "source": "PR-SLEEP-P4.jpg"
+    },
+    "SZ-08": {
+      "type": "picture",
+      "file": "pictures/SZ-08.webp",
+      "source": "SZ-08.jpg"
+    },
+    "SZ-12": {
+      "type": "picture",
+      "file": "pictures/SZ-12.webp",
+      "source": "SZ-12.jpg"
+    },
+    "SZ-16": {
+      "type": "picture",
+      "file": "pictures/SZ-16.webp",
+      "source": "SZ-16.jpg"
+    },
+    "SZ-20": {
+      "type": "picture",
+      "file": "pictures/SZ-20.webp",
+      "source": "SZ-20.jpg"
+    },
+    "SZ-24": {
+      "type": "picture",
+      "file": "pictures/SZ-24.webp",
+      "source": "SZ-24.jpg"
+    },
+    "SZ-28": {
+      "type": "picture",
+      "file": "pictures/SZ-28.webp",
+      "source": "SZ-28.jpg"
+    },
+    "SZ-32": {
+      "type": "picture",
+      "file": "pictures/SZ-32.webp",
+      "source": "SZ-32.jpg"
+    },
+    "SZ-36": {
+      "type": "picture",
+      "file": "pictures/SZ-36.webp",
+      "source": "SZ-36.jpg"
+    },
+    "SZ-40": {
+      "type": "picture",
+      "file": "pictures/SZ-40.webp",
+      "source": "SZ-40.jpg"
+    }
+  }
+}

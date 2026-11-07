@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/content_assets.dart';
 import '../core/tx.dart';
 import 'content_widgets.dart';
 import 'theme.dart';
@@ -82,8 +83,8 @@ class MonthCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        asset == null ? Illus(art, height: 140) : ContentPicture(asset!, height: 180, fallback: Illus(art, height: 140)),
-        const Gap(12),
+        if (asset != null) ContentPicture(asset!, height: 180, fallback: const SizedBox.shrink()),
+        if (asset != null && ContentAssets.has(asset!)) const Gap(12),
         Row(
           children: [
             Expanded(child: Text(babyTitle, style: Theme.of(context).textTheme.titleMedium)),

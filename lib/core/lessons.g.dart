@@ -2,27 +2,66 @@
 import 'content.dart';
 import 'tx.dart';
 
-class LessonCategory { final String key; final Tx title; final String art; const LessonCategory(this.key, this.title, this.art); }
-class LessonStep { final Tx text; final String art; final Level? warn; const LessonStep(this.text, this.art, this.warn); }
+class LessonCategory {
+  final String key;
+  final Tx title;
+  final String art;
+  const LessonCategory(this.key, this.title, this.art);
+}
+
+class LessonStep {
+  final Tx text;
+  final String art;
+  final Level? warn;
+  const LessonStep(this.text, this.art, this.warn);
+}
+
 class Lesson {
-  final String id, category, format, stage; final int minutes; final Tx title; final List<LessonStep> steps;
+  final String id, category, format, stage;
+  final int minutes;
+  final Tx title;
+  final List<LessonStep> steps;
+
   /// Content-kit ID prefix: step i shows the delivered picture ASSET-P(i+1) when present.
   final String asset;
+
   /// MA-56: key facts shown first, related lesson ids, guideline sources, clinical sign-off (null = pending).
   final List<Tx> facts;
   final List<String> related, sources;
   final LessonReview? review;
-  const Lesson(this.id, this.category, this.format, this.stage, this.minutes, this.title, this.steps,
-      {this.asset = '', this.facts = const [], this.related = const [], this.sources = const [], this.review});
+  const Lesson(
+    this.id,
+    this.category,
+    this.format,
+    this.stage,
+    this.minutes,
+    this.title,
+    this.steps, {
+    this.asset = '',
+    this.facts = const [],
+    this.related = const [],
+    this.sources = const [],
+    this.review,
+  });
   bool forStage(String s) => stage == 'all' || stage == s;
+
   /// Steps that carry a warning level, most urgent first: the "When to get help" box.
   List<LessonStep> get warnings => [...steps.where((x) => x.warn == Level.red), ...steps.where((x) => x.warn == Level.amber)];
 }
 
 /// Clinical sign-off: reviewer role (never a personal name), date reviewed, date the next review is due.
-class LessonReview { final String by, on, due; const LessonReview(this.by, this.on, this.due); }
+class LessonReview {
+  final String by, on, due;
+  const LessonReview(this.by, this.on, this.due);
+}
 
-class QuizQ { final Tx q; final List<Tx> options; final int answer; final Tx why; const QuizQ(this.q, this.options, this.answer, this.why); }
+class QuizQ {
+  final Tx q;
+  final List<Tx> options;
+  final int answer;
+  final Tx why;
+  const QuizQ(this.q, this.options, this.answer, this.why);
+}
 
 const lessonCategories = <LessonCategory>[
   LessonCategory('preg', Tx('Pregnancy and birth preparation', 'Ujauzito na maandalizi ya kujifungua'), 'mother_belly'),
@@ -32,283 +71,1019 @@ const lessonCategories = <LessonCategory>[
 ];
 
 const lessons = <Lesson>[
-  Lesson('danger-preg', 'preg', 'video', 'pregnant', 1, Tx('Danger signs in pregnancy', 'Dalili za hatari wakati wa ujauzito'), [
-    LessonStep(Tx('Bleeding from the vagina: go to the facility now.', 'Kutokwa damu ukeni: nenda kituoni sasa.'), 'alert', Level.red),
-    LessonStep(Tx('Severe headache, blurred vision or fits: go now.', 'Kichwa kuuma sana, kuona ukungu au degedege: nenda sasa.'), 'headache', Level.red),
-    LessonStep(Tx('Swollen face or hands with headache or blurred vision, or severe belly pain: go now.', 'Uso au mikono kuvimba pamoja na kichwa kuuma au kuona ukungu, au maumivu makali ya tumbo: nenda sasa.'), 'clinic', Level.red),
-    LessonStep(Tx('Water leaking: go now. Fever, or baby moving less: see a health worker today.', 'Maji kutoka: nenda sasa. Homa, au mtoto kucheza kidogo: muone mhudumu wa afya leo.'), 'phone', Level.red),
-  ], asset: 'PR-DANGER',
-     facts: [Tx('Bleeding, fits, severe headache, blurred vision or leaking water: go to the facility now.', 'Damu, degedege, kichwa kuuma sana, kuona ukungu au maji kutoka: nenda kituoni sasa.'), Tx('Fever, or baby moving less: see a health worker today.', 'Homa, au mtoto kucheza kidogo: muone mhudumu wa afya leo.')],
-     related: ['bp-preg', 'kicks', 'labour'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)', 'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)']),
-  Lesson('birth-plan', 'preg', 'guide', 'pregnant', 3, Tx('Your birth plan', 'Mpango wako wa kujifungua'), [
-    LessonStep(Tx('Choose the facility where you will give birth.', 'Chagua kituo utakachojifungulia.'), 'clinic', null),
-    LessonStep(Tx('Plan transport and save money for the journey.', 'Panga usafiri na weka akiba ya nauli.'), 'bus', null),
-    LessonStep(Tx('Choose a birth companion and someone to care for your home.', 'Chagua msindikizaji na mtu wa kutunza nyumbani.'), 'talk', null),
-    LessonStep(Tx('Pack clean cloths, baby clothes and your clinic card.', 'Andaa vitambaa safi, nguo za mtoto na kadi ya kliniki.'), 'bag', null),
-  ], asset: 'PR-PLAN',
-     facts: [Tx('Choose your facility, transport and birth companion before labour starts.', 'Chagua kituo, usafiri na msindikizaji kabla uchungu haujaanza.'), Tx('Keep your bag ready with clean cloths, baby clothes and your clinic card.', 'Weka begi tayari lenye vitambaa safi, nguo za mtoto na kadi ya kliniki.')],
-     related: ['labour', 'danger-preg', 'breastfeed'],
-     sources: ['WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)', 'WHO recommendations on antenatal care for a positive pregnancy experience (2016)']),
-  Lesson('kicks', 'preg', 'audio', 'pregnant', 2, Tx('Knowing your baby\'s movements', 'Kuifahamu mitikisiko ya mtoto'), [
-    LessonStep(Tx('From about 28 weeks, notice your baby\'s movements every day.', 'Kuanzia wiki 28, fuatilia mateke ya mtoto kila siku.'), 'mother_belly', null),
-    LessonStep(Tx('Lie on your left side after a meal and notice the kicks, rolls and swishes. There is no number to reach.', 'Lala kwa ubavu wa kushoto baada ya kula na fuatilia mateke na mizunguko. Hakuna idadi ya kufikia.'), 'lie_left', null),
-    LessonStep(Tx('Learn your baby\'s usual pattern.', 'Jifunze mtindo wa kawaida wa mtoto wako.'), 'calendar', null),
-    LessonStep(Tx('If movements are fewer than usual or stop, contact a health worker today. Do not wait until tomorrow.', 'Mateke yakipungua au kukoma, wasiliana na mhudumu wa afya leo. Usisubiri kesho.'), 'phone', Level.amber),
-  ], asset: 'PR-KICKS',
-     facts: [Tx('From about 28 weeks, learn your baby\'s usual pattern of movements.', 'Kuanzia wiki 28 hivi, jifunze tabia ya kawaida ya mitikisiko ya mtoto wako.'), Tx('Fewer movements than usual: contact a health worker today, not tomorrow.', 'Mitikisiko michache kuliko kawaida: wasiliana na mhudumu wa afya leo, si kesho.')],
-     related: ['danger-preg', 'sleep-preg'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)']),
-  Lesson('labour', 'preg', 'guide', 'pregnant', 2, Tx('Signs of labour', 'Dalili za uchungu'), [
-    LessonStep(Tx('Regular, painful tightenings that get stronger and closer together.', 'Maumivu ya tumbo yanayokuja kwa mpangilio na kuongezeka.'), 'clock', null),
-    LessonStep(Tx('A show of mucus with a little blood.', 'Ute wenye damu kidogo.'), 'mother_belly', null),
-    LessonStep(Tx('Your water breaks: go to the facility, even without pain.', 'Chupa ikipasuka: nenda kituoni hata bila maumivu.'), 'clinic', null),
-    LessonStep(Tx('Heavy bleeding is not normal labour: go now.', 'Damu nyingi si uchungu wa kawaida: nenda sasa.'), 'alert', Level.red),
-  ], asset: 'PR-LABOUR',
-     facts: [Tx('Regular tightenings that get stronger and closer mean labour is starting.', 'Mikazo ya mara kwa mara inayoongezeka nguvu na kukaribiana maana yake uchungu unaanza.'), Tx('Water breaking: go to the facility, even without pain. Heavy bleeding: go now.', 'Maji kupasuka: nenda kituoni, hata bila maumivu. Damu nyingi: nenda sasa.')],
-     related: ['birth-plan', 'danger-preg'],
-     sources: ['WHO recommendations: intrapartum care for a positive childbirth experience (2018)', 'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)']),
-  Lesson('eat-well', 'nutri', 'guide', 'all', 3, Tx('Eating well, the East African way', 'Lishe bora kwa vyakula vya nyumbani'), [
-    LessonStep(Tx('Add beans, lentils or groundnuts to one meal every day.', 'Ongeza maharage, dengu au karanga kwenye mlo mmoja kila siku.'), 'plate', null),
-    LessonStep(Tx('Eat dark green leaves like mchicha or sukuma wiki.', 'Kula mboga za majani kama mchicha au sukuma wiki.'), 'greens', null),
-    LessonStep(Tx('Small fish like dagaa give protein and calcium.', 'Samaki wadogo kama dagaa wana protini na kalsiamu.'), 'fish', null),
-    LessonStep(Tx('Eat a fruit with meals to help your body use iron.', 'Kula tunda pamoja na chakula kusaidia mwili kutumia madini ya chuma.'), 'fruit', null),
-  ], asset: 'NU-EAT',
-     facts: [Tx('Every day, add beans or groundnuts, dark green leaves and small fish.', 'Kila siku, ongeza maharage au karanga, mboga za kijani kibichi na samaki wadogo.'), Tx('A fruit with meals helps your body use iron.', 'Tunda pamoja na mlo husaidia mwili kutumia madini ya chuma.')],
-     related: ['ifa', 'solids'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)']),
-  Lesson('ifa', 'nutri', 'audio', 'all', 2, Tx('Iron and folic acid tablets', 'Vidonge vya madini ya chuma na foliki'), [
-    LessonStep(Tx('Take one tablet every day, as your clinic prescribed.', 'Meza kidonge kimoja kila siku, kama kliniki ilivyokuandikia.'), 'pill', null),
-    LessonStep(Tx('Take it with water or juice, not with tea or coffee.', 'Meza kwa maji au juisi, si kwa chai au kahawa.'), 'glass', null),
-    LessonStep(Tx('Dark stools are normal. Mild nausea often passes.', 'Choo cheusi ni kawaida. Kichefuchefu kidogo hupita.'), 'talk', null),
-    LessonStep(Tx('If you forget a day, continue the next day. Do not take two.', 'Ukisahau siku moja, endelea kesho. Usimeze viwili.'), 'calendar', null),
-  ], asset: 'NU-IFA',
-     facts: [Tx('Take one tablet a day with water or juice, not tea or coffee.', 'Meza kidonge kimoja kwa siku kwa maji au juisi, si chai wala kahawa.'), Tx('Forgot a day? Continue the next day. Never take two.', 'Umesahau siku moja? Endelea siku inayofuata. Usimeze viwili.')],
-     related: ['eat-well', 'danger-preg'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)']),
-  Lesson('mood', 'nutri', 'audio', 'all', 3, Tx('Feeling low in pregnancy or after birth', 'Huzuni wakati wa ujauzito au baada ya kujifungua'), [
-    LessonStep(Tx('Many mothers feel tired, worried or tearful. You are not alone.', 'Akina mama wengi huchoka, huwa na wasiwasi au hulia. Hauko peke yako.'), 'cloud', null),
-    LessonStep(Tx('Talk to someone you trust, and rest when you can.', 'Ongea na mtu unayemwamini, na pumzika unapoweza.'), 'talk', null),
-    LessonStep(Tx('If you feel very sad for more than two weeks, tell your health worker.', 'Ukihisi huzuni kubwa kwa zaidi ya wiki mbili, mwambie mhudumu wa afya.'), 'clinic', null),
-    LessonStep(Tx('If you have thoughts of harming yourself or your baby, get help today.', 'Ukiwa na mawazo ya kujidhuru au kumdhuru mtoto, tafuta msaada leo.'), 'phone', Level.amber),
-  ], asset: 'NU-MOOD',
-     facts: [Tx('Feeling very sad for more than two weeks: tell your health worker.', 'Huzuni kubwa kwa zaidi ya wiki mbili: mwambie mhudumu wa afya.'), Tx('Thoughts of harming yourself or your baby: get help today.', 'Mawazo ya kujidhuru au kumdhuru mtoto: pata msaada leo.')],
-     related: ['spacing', 'eat-well'],
-     sources: ['WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)', 'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)']),
-  Lesson('breastfeed', 'feed', 'video', 'all', 1, Tx('Breastfeeding from the first hour', 'Kunyonyesha tangu saa ya kwanza'), [
-    LessonStep(Tx('Hold baby skin-to-skin and start breastfeeding within one hour of birth.', 'Mweke mtoto ngozi kwa ngozi na anza kunyonyesha ndani ya saa moja baada ya kuzaliwa.'), 'mother_baby', null),
-    LessonStep(Tx('The first yellow milk (colostrum) protects your baby.', 'Maziwa ya kwanza ya njano yanamkinga mtoto.'), 'breastfeed', null),
-    LessonStep(Tx('Give breast milk only, with no water or other food, until 6 months.', 'Mpe maziwa ya mama pekee, bila maji wala chakula kingine, hadi miezi 6.'), 'breastfeed', null),
-    LessonStep(Tx('Feed whenever baby wants, day and night, at least 8 times a day.', 'Nyonyesha kila mtoto anapotaka, mchana na usiku, angalau mara 8 kwa siku.'), 'clock', null),
-  ], asset: 'BF-FIRST',
-     facts: [Tx('Start breastfeeding within one hour of birth, skin-to-skin.', 'Anza kunyonyesha ndani ya saa moja baada ya kuzaliwa, ngozi kwa ngozi.'), Tx('Breast milk only until 6 months, at least 8 feeds a day.', 'Maziwa ya mama pekee hadi miezi 6, angalau mara 8 kwa siku.')],
-     related: ['attach', 'bf-positions', 'expressing'],
-     sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)', 'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)']),
-  Lesson('attach', 'feed', 'guide', 'baby', 2, Tx('Good attachment at the breast', 'Kunyonya kwa usahihi'), [
-    LessonStep(Tx('Baby\'s chin touches the breast and the mouth is wide open.', 'Kidevu cha mtoto kinagusa titi na mdomo uko wazi.'), 'latch', null),
-    LessonStep(Tx('More of the dark area shows above the lip than below.', 'Sehemu nyeusi ya titi inaonekana zaidi juu ya mdomo kuliko chini.'), 'latch', null),
-    LessonStep(Tx('You hear slow, deep sucks and swallowing.', 'Unasikia mivuto ya polepole na kumeza.'), 'breastfeed', null),
-    LessonStep(Tx('Pain or cracked nipples: ask a health worker to check the attachment.', 'Maumivu au chuchu kupasuka: muombe mhudumu wa afya aangalie unavyonyonyesha.'), 'talk', null),
-  ], asset: 'BF-LATCH',
-     facts: [Tx('Mouth wide open, chin on the breast, slow deep sucks.', 'Mdomo wazi sana, kidevu kwenye titi, kunyonya taratibu kwa kina.'), Tx('Pain or cracked nipples: ask a health worker to check the attachment.', 'Maumivu au chuchu kupasuka: muombe mhudumu wa afya aangalie unyonyaji.')],
-     related: ['bf-positions', 'breastfeed', 'expressing'],
-     sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)']),
-  Lesson('solids', 'feed', 'guide', 'baby', 3, Tx('Starting foods at 6 months', 'Kuanza vyakula akiwa na miezi 6'), [
-    LessonStep(Tx('At 6 months, keep breastfeeding and add soft foods.', 'Akifikisha miezi 6, endelea kunyonyesha na ongeza vyakula laini.'), 'bowl', null),
-    LessonStep(Tx('Start with thick porridge (uji) with groundnut or dagaa powder.', 'Anza na uji mzito ulioongezwa unga wa karanga au dagaa.'), 'bowl', null),
-    LessonStep(Tx('Add mashed banana, avocado, pumpkin and well-cooked beans.', 'Ongeza ndizi, parachichi, maboga na maharage yaliyopondwa.'), 'fruit', null),
-    LessonStep(Tx('Wash hands and use a clean cup and spoon. Avoid feeding bottles.', 'Nawa mikono na tumia kikombe na kijiko safi. Epuka chupa.'), 'hands', null),
-  ], asset: 'BF-SOLIDS',
-     facts: [Tx('At 6 months, keep breastfeeding and add thick porridge and soft foods.', 'Kwa miezi 6, endelea kunyonyesha na ongeza uji mzito na vyakula laini.'), Tx('Use clean hands, a cup and a spoon. Avoid feeding bottles.', 'Tumia mikono safi, kikombe na kijiko. Epuka chupa za kunyonyeshea.')],
-     related: ['eat-well', 'hygiene'],
-     sources: ['WHO guideline for complementary feeding of infants and young children 6–23 months of age (2023)']),
-  Lesson('warm', 'newborn', 'guide', 'all', 2, Tx('Keeping your newborn warm', 'Kumweka mtoto mchanga katika joto'), [
-    LessonStep(Tx('Dry baby straight after birth and hold them skin-to-skin.', 'Mkaushe mtoto mara baada ya kuzaliwa na mkumbatie ngozi kwa ngozi.'), 'mother_baby', null),
-    LessonStep(Tx('Dress baby in one more layer than you, with a hat.', 'Mvalishe mtoto nguo moja zaidi yako, na kofia.'), 'baby_hat', null),
-    LessonStep(Tx('Wait at least 24 hours before the first bath.', 'Subiri angalau saa 24 kabla ya kumwogesha mara ya kwanza.'), 'calendar', null),
-    LessonStep(Tx('Cold hands, feet and body: warm baby and see a health worker today.', 'Mikono, miguu na mwili wa baridi: mpe joto na muone mhudumu wa afya leo.'), 'thermo', Level.amber),
-  ], asset: 'NB-WARM',
-     facts: [Tx('Skin-to-skin, a hat and one more layer keep your baby warm.', 'Ngozi kwa ngozi, kofia na nguo moja zaidi humpa mtoto joto.'), Tx('Cold hands, feet and body: warm baby and see a health worker today.', 'Mikono, miguu na mwili baridi: mpe mtoto joto na muone mhudumu wa afya leo.')],
-     related: ['kmc', 'safe-sleep', 'danger-baby'],
-     sources: ['WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)', 'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)']),
-  Lesson('cord', 'newborn', 'audio', 'all', 2, Tx('Caring for the cord', 'Kutunza kitovu'), [
-    LessonStep(Tx('Keep the cord clean and dry. Wash your hands before touching it.', 'Weka kitovu kisafi na kikavu. Nawa mikono kabla ya kukigusa.'), 'hands', null),
-    LessonStep(Tx('Do not put anything on the cord.', 'Usiweke kitu chochote kwenye kitovu.'), 'cord', null),
-    LessonStep(Tx('Fold the nappy below the cord.', 'Kunja nepi chini ya kitovu.'), 'cord', null),
-    LessonStep(Tx('Redness, pus or a bad smell: see a health worker today.', 'Wekundu, usaha au harufu mbaya: muone mhudumu wa afya leo.'), 'clinic', Level.amber),
-  ], asset: 'NB-CORD',
-     facts: [Tx('Keep the cord clean and dry, and put nothing on it.', 'Kiweke kitovu kisafi na kikavu, na usipake chochote.'), Tx('Redness, pus or a bad smell: see a health worker today.', 'Wekundu, usaha au harufu mbaya: muone mhudumu wa afya leo.')],
-     related: ['hygiene', 'danger-baby'],
-     sources: ['WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)']),
-  Lesson('danger-baby', 'newborn', 'video', 'all', 1, Tx('Danger signs in babies', 'Dalili za hatari kwa mtoto'), [
-    LessonStep(Tx('Not able to breastfeed, or vomiting everything.', 'Hawezi kunyonya, au anatapika kila kitu.'), 'breastfeed', Level.red),
-    LessonStep(Tx('Fits, or very sleepy and hard to wake.', 'Degedege, au amelegea na ni vigumu kumwamsha.'), 'baby_back', Level.red),
-    LessonStep(Tx('Fast breathing, or the chest pulling in.', 'Anapumua haraka, au kifua kinavutika ndani.'), 'baby_back', Level.red),
-    LessonStep(Tx('Fever or feeling cold, especially before 2 months: go to the facility now.', 'Homa au baridi, hasa kabla ya miezi 2: nenda kituoni sasa.'), 'thermo', Level.red),
-  ], asset: 'NB-DANGER',
-     facts: [Tx('Not feeding, fits, very sleepy, fast breathing or chest pulling in: go now.', 'Hanyonyi, degedege, usingizi mzito, kupumua haraka au kifua kuvutika: nenda sasa.'), Tx('Fever or feeling cold before 2 months: go to the facility now.', 'Homa au baridi kabla ya miezi 2: nenda kituoni sasa.')],
-     related: ['warm', 'cord', 'breastfeed'],
-     sources: ['WHO Integrated Management of Childhood Illness chart booklet (2014)', 'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)']),
-  Lesson('hygiene', 'newborn', 'guide', 'all', 2, Tx('Handwashing and safe water', 'Kunawa mikono na maji salama'), [
-    LessonStep(Tx('Wash hands with soap after the toilet and before feeding or cooking.', 'Nawa mikono kwa sabuni baada ya choo na kabla ya kulisha au kupika.'), 'hands', null),
-    LessonStep(Tx('Boil or treat drinking water for the family.', 'Chemsha au tibu maji ya kunywa ya familia.'), 'glass', null),
-    LessonStep(Tx('Keep baby\'s cups, spoons and cloths clean.', 'Weka vikombe, vijiko na vitambaa vya mtoto safi.'), 'bowl', null),
-    LessonStep(Tx('Sleep under a treated mosquito net with your baby.', 'Lala na mtoto ndani ya chandarua chenye dawa.'), 'net', null),
-  ], asset: 'NB-HYG',
-     facts: [Tx('Wash hands with soap after the toilet and before feeding or cooking.', 'Nawa mikono kwa sabuni baada ya choo na kabla ya kulisha au kupika.'), Tx('Boil or treat drinking water, and sleep under a treated net.', 'Chemsha au tibu maji ya kunywa, na lala ndani ya chandarua chenye dawa.')],
-     related: ['cord', 'solids'],
-     sources: ['WHO Integrated Management of Childhood Illness chart booklet (2014)']),
-  Lesson('spacing', 'nutri', 'guide', 'baby', 2, Tx('Spacing your next pregnancy', 'Kupanga uzazi'), [
-    LessonStep(Tx('Waiting at least 2 years before the next pregnancy is healthier for you and your baby.', 'Kusubiri angalau miaka 2 kabla ya ujauzito mwingine ni bora kwako na kwa mtoto.'), 'calendar', null),
-    LessonStep(Tx('Breastfeeding alone is not reliable protection after 6 months or once your period returns.', 'Kunyonyesha pekee si kinga ya kuaminika baada ya miezi 6 au hedhi ikirudi.'), 'breastfeed', null),
-    LessonStep(Tx('Ask about family planning at your postnatal or child clinic visit.', 'Uliza kuhusu uzazi wa mpango kliniki ya baada ya kujifungua au ya mtoto.'), 'talk', null),
-    LessonStep(Tx('Many methods are safe while breastfeeding.', 'Njia nyingi ni salama wakati wa kunyonyesha.'), 'pill', null),
-  ], asset: 'NU-SPACE',
-     facts: [Tx('Waiting at least 2 years before the next pregnancy is healthier.', 'Kusubiri angalau miaka 2 kabla ya ujauzito mwingine ni bora kwa afya.'), Tx('Ask about family planning at your postnatal or child clinic visit.', 'Uliza kuhusu uzazi wa mpango kliniki ya baada ya kujifungua au ya mtoto.')],
-     related: ['breastfeed', 'mood'],
-     sources: ['Report of a WHO technical consultation on birth spacing (2005)', 'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)']),
-  Lesson('sleep-preg', 'preg', 'guide', 'pregnant', 2, Tx('Sleeping well in pregnancy', 'Kulala vizuri wakati wa ujauzito'), [
-    LessonStep(Tx('From 28 weeks, go to sleep on your side, left or right.', 'Kuanzia wiki 28, lala kwa ubavu, kushoto au kulia.'), 'lie_left', null),
-    LessonStep(Tx('If you wake up on your back, just turn onto your side.', 'Ukiamka umelala chali, geuka tu ulale kwa ubavu.'), 'lie_left', null),
-    LessonStep(Tx('Sleep under a treated mosquito net every night.', 'Lala ndani ya chandarua chenye dawa kila usiku.'), 'net', null),
-    LessonStep(Tx('Rest in the shade in the day when you can.', 'Pumzika kivulini mchana unapoweza.'), 'mother_belly', null),
-  ], asset: 'PR-SLEEP',
-     facts: [Tx('From 28 weeks, go to sleep on your side.', 'Kuanzia wiki 28, lala kwa ubavu.'), Tx('Woke up on your back? Just turn onto your side.', 'Umeamka chali? Geuka tu ulale kwa ubavu.')],
-     related: ['kicks', 'danger-preg'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)']),
-  Lesson('bp-preg', 'preg', 'guide', 'pregnant', 2, Tx('Blood pressure in pregnancy', 'Shinikizo la damu wakati wa ujauzito'), [
-    LessonStep(Tx('High blood pressure can come with no signs at all. Have it measured.', 'Shinikizo la juu linaweza kuja bila dalili yoyote. Pimwa.'), 'clinic', null),
-    LessonStep(Tx('140/90 or higher: see a health worker within 24 hours.', '140/90 au zaidi: muone mhudumu wa afya ndani ya saa 24.'), 'alert', null),
-    LessonStep(Tx('High blood pressure with headache, blurred vision, pain under the ribs or a swollen face: go now.', 'Shinikizo la juu pamoja na kichwa kuuma, kuona ukungu, maumivu chini ya mbavu au uso kuvimba: nenda sasa.'), 'headache', Level.red),
-    LessonStep(Tx('From 20 weeks, have it measured every week by your CHW or clinic.', 'Kuanzia wiki 20, pimwa kila wiki na mhudumu wa jamii au kliniki.'), 'calendar', null),
-  ], asset: 'PR-BP',
-     facts: [Tx('High blood pressure can have no signs. Have it measured weekly from 20 weeks.', 'Shinikizo la juu linaweza kuwa bila dalili. Pimwa kila wiki kuanzia wiki 20.'), Tx('High pressure with headache, blurred vision or a swollen face: go now.', 'Shinikizo la juu pamoja na kichwa kuuma, kuona ukungu au uso kuvimba: nenda sasa.')],
-     related: ['danger-preg', 'sleep-preg'],
-     sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)', 'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)']),
-  Lesson('bf-positions', 'feed', 'guide', 'all', 2, Tx('Breastfeeding positions', 'Mikao ya kunyonyesha'), [
-    LessonStep(Tx('Cradle hold: baby\'s whole body faces you, ear, shoulder and hip in a line.', 'Mkao wa kubeba: mwili wote wa mtoto unakuelekea, sikio, bega na nyonga katika mstari mmoja.'), 'breastfeed', null),
-    LessonStep(Tx('Cross-cradle hold: your other arm supports the neck and shoulders. Good for newborns.', 'Mkao wa kubeba kwa mkono mwingine: mkono wako mwingine unashika shingo na mabega. Unafaa kwa watoto wachanga.'), 'latch', null),
-    LessonStep(Tx('Lying on your side helps after a caesarean or at night. Keep pillows away from baby.', 'Kulala kwa ubavu kunasaidia baada ya upasuaji au usiku. Weka mito mbali na mtoto.'), 'mother_baby', null),
-    LessonStep(Tx('Twins: hold one baby under each arm, on a pillow.', 'Mapacha: beba mtoto mmoja chini ya kila mkono, juu ya mto.'), 'breastfeed', null),
-  ], asset: 'BF-POS',
-     facts: [Tx('Baby\'s ear, shoulder and hip in one line, whole body facing you.', 'Sikio, bega na nyonga ya mtoto katika mstari mmoja, mwili wote ukikutazama.'), Tx('Feeding lying down? Keep pillows away from baby\'s face.', 'Unanyonyesha umelala? Weka mito mbali na uso wa mtoto.')],
-     related: ['attach', 'expressing'],
-     sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)']),
-  Lesson('expressing', 'feed', 'guide', 'all', 3, Tx('Expressing milk by hand', 'Kukamua maziwa kwa mkono'), [
-    LessonStep(Tx('Wash your hands and use a clean, wide cup.', 'Nawa mikono na tumia kikombe kisafi na kipana.'), 'hands', null),
-    LessonStep(Tx('Put your thumb and finger at the edge of the dark area, press back, then together. Do not squeeze the nipple.', 'Weka kidole gumba na kidole kingine pembeni mwa sehemu nyeusi, bonyeza kuelekea ndani, kisha bana. Usibane chuchu.'), 'glass', null),
-    LessonStep(Tx('Cover the milk and keep it cool. Use it within 6 hours.', 'Funika maziwa na yaweke mahali penye ubaridi. Yatumie ndani ya saa 6.'), 'clock', null),
-    LessonStep(Tx('Feed from a small open cup, with baby sitting up. Do not use a bottle.', 'Mlishe kwa kikombe kidogo kilicho wazi, mtoto akiwa amekaa wima. Usitumie chupa.'), 'glass', null),
-  ], asset: 'BF-EXP',
-     facts: [Tx('Press at the edge of the dark area. Never squeeze the nipple.', 'Bonyeza pembeni mwa sehemu nyeusi. Usibane chuchu.'), Tx('Cover the milk, keep it cool, and use it within 6 hours.', 'Funika maziwa, yaweke mahali penye ubaridi, na yatumie ndani ya saa 6.')],
-     related: ['breastfeed', 'kmc'],
-     sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)']),
-  Lesson('safe-sleep', 'newborn', 'guide', 'all', 2, Tx('Safe sleep for your baby', 'Usingizi salama kwa mtoto'), [
-    LessonStep(Tx('Lay baby on the back for every sleep, on a firm, flat place.', 'Mlaze mtoto chali kila anapolala, mahali pagumu na tambarare.'), 'baby_back', null),
-    LessonStep(Tx('Keep pillows, toys and heavy blankets away from baby\'s face.', 'Weka mito, vitu vya kuchezea na blanketi nzito mbali na uso wa mtoto.'), 'baby_hat', null),
-    LessonStep(Tx('Keep baby close, in the same room, under a treated net.', 'Mweke mtoto karibu, chumba kimoja nawe, ndani ya chandarua chenye dawa.'), 'net', null),
-    LessonStep(Tx('Nobody smokes in the house or near baby.', 'Mtu yeyote asivute sigara ndani ya nyumba wala karibu na mtoto.'), 'alert', null),
-  ], asset: 'NB-SLEEP',
-     facts: [Tx('Lay baby on the back for every sleep, on a firm, flat place.', 'Mlaze mtoto chali kila anapolala, mahali pagumu na tambarare.'), Tx('Keep pillows and heavy blankets away, and no smoking near baby.', 'Weka mito na blanketi nzito mbali, na mtu asivute sigara karibu na mtoto.')],
-     related: ['warm', 'kmc'],
-     sources: []),
-  Lesson('kmc', 'newborn', 'guide', 'all', 3, Tx('Kangaroo care for small babies', 'Malezi ya kangaruu kwa watoto wadogo'), [
-    LessonStep(Tx('A small or early baby stays warm best skin-to-skin, upright on your chest, in a nappy and hat.', 'Mtoto mdogo au aliyezaliwa kabla ya wakati hupata joto zaidi akiwa ngozi kwa ngozi, wima kifuani kwako, akiwa na nepi na kofia.'), 'mother_baby', null),
-    LessonStep(Tx('Tie a kanga around you both so baby is held safely, face free.', 'Funga kanga kuwazunguka wote wawili ili mtoto akae salama, uso wazi.'), 'mother_baby', null),
-    LessonStep(Tx('Your partner or a grandmother can take turns.', 'Mwenzako au bibi anaweza kupokezana nawe.'), 'talk', null),
-    LessonStep(Tx('Breastfeed often, at least every 2 to 3 hours.', 'Mnyonyeshe mara nyingi, angalau kila saa 2 hadi 3.'), 'clock', null),
-  ], asset: 'NB-KMC',
-     facts: [Tx('A small baby stays warm best skin-to-skin, upright on your chest.', 'Mtoto mdogo hupata joto bora ngozi kwa ngozi, wima kifuani mwako.'), Tx('Breastfeed often, at least every 2 to 3 hours.', 'Mnyonyeshe mara nyingi, angalau kila saa 2 hadi 3.')],
-     related: ['warm', 'breastfeed', 'expressing'],
-     sources: ['WHO recommendations for care of the preterm or low-birth-weight infant (2022)']),
+  Lesson(
+    'danger-preg',
+    'preg',
+    'video',
+    'pregnant',
+    1,
+    Tx('Danger signs in pregnancy', 'Dalili za hatari wakati wa ujauzito'),
+    [
+      LessonStep(Tx('Bleeding from the vagina: go to the facility now.', 'Kutokwa damu ukeni: nenda kituoni sasa.'), 'alert', Level.red),
+      LessonStep(Tx('Severe headache, blurred vision or fits: go now.', 'Kichwa kuuma sana, kuona ukungu au degedege: nenda sasa.'), 'headache', Level.red),
+      LessonStep(
+        Tx(
+          'Swollen face or hands with headache or blurred vision, or severe belly pain: go now.',
+          'Uso au mikono kuvimba pamoja na kichwa kuuma au kuona ukungu, au maumivu makali ya tumbo: nenda sasa.',
+        ),
+        'clinic',
+        Level.red,
+      ),
+      LessonStep(
+        Tx(
+          'Water leaking: go now. Fever, or baby moving less: see a health worker today.',
+          'Maji kutoka: nenda sasa. Homa, au mtoto kucheza kidogo: muone mhudumu wa afya leo.',
+        ),
+        'phone',
+        Level.red,
+      ),
+    ],
+    asset: 'PR-DANGER',
+    facts: [
+      Tx(
+        'Bleeding, fits, severe headache, blurred vision or leaking water: go to the facility now.',
+        'Damu, degedege, kichwa kuuma sana, kuona ukungu au maji kutoka: nenda kituoni sasa.',
+      ),
+      Tx('Fever, or baby moving less: see a health worker today.', 'Homa, au mtoto kucheza kidogo: muone mhudumu wa afya leo.'),
+    ],
+    related: ['bp-preg', 'kicks', 'labour'],
+    sources: [
+      'WHO recommendations on antenatal care for a positive pregnancy experience (2016)',
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+    ],
+  ),
+  Lesson(
+    'birth-plan',
+    'preg',
+    'guide',
+    'pregnant',
+    3,
+    Tx('Your birth plan', 'Mpango wako wa kujifungua'),
+    [
+      LessonStep(Tx('Choose the facility where you will give birth.', 'Chagua kituo utakachojifungulia.'), 'clinic', null),
+      LessonStep(Tx('Plan transport and save money for the journey.', 'Panga usafiri na weka akiba ya nauli.'), 'bus', null),
+      LessonStep(Tx('Choose a birth companion and someone to care for your home.', 'Chagua msindikizaji na mtu wa kutunza nyumbani.'), 'talk', null),
+      LessonStep(Tx('Pack clean cloths, baby clothes and your clinic card.', 'Andaa vitambaa safi, nguo za mtoto na kadi ya kliniki.'), 'bag', null),
+    ],
+    asset: 'PR-PLAN',
+    facts: [
+      Tx('Choose your facility, transport and birth companion before labour starts.', 'Chagua kituo, usafiri na msindikizaji kabla uchungu haujaanza.'),
+      Tx(
+        'Keep your bag ready with clean cloths, baby clothes and your clinic card.',
+        'Weka begi tayari lenye vitambaa safi, nguo za mtoto na kadi ya kliniki.',
+      ),
+    ],
+    related: ['labour', 'danger-preg', 'breastfeed'],
+    sources: [
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+      'WHO recommendations on antenatal care for a positive pregnancy experience (2016)',
+    ],
+  ),
+  Lesson(
+    'kicks',
+    'preg',
+    'audio',
+    'pregnant',
+    2,
+    Tx('Knowing your baby\'s movements', 'Kuifahamu mitikisiko ya mtoto'),
+    [
+      LessonStep(
+        Tx('From about 28 weeks, notice your baby\'s movements every day.', 'Kuanzia wiki 28, fuatilia mateke ya mtoto kila siku.'),
+        'mother_belly',
+        null,
+      ),
+      LessonStep(
+        Tx(
+          'Lie on your left side after a meal and notice the kicks, rolls and swishes. There is no number to reach.',
+          'Lala kwa ubavu wa kushoto baada ya kula na fuatilia mateke na mizunguko. Hakuna idadi ya kufikia.',
+        ),
+        'lie_left',
+        null,
+      ),
+      LessonStep(Tx('Learn your baby\'s usual pattern.', 'Jifunze mtindo wa kawaida wa mtoto wako.'), 'calendar', null),
+      LessonStep(
+        Tx(
+          'If movements are fewer than usual or stop, contact a health worker today. Do not wait until tomorrow.',
+          'Mateke yakipungua au kukoma, wasiliana na mhudumu wa afya leo. Usisubiri kesho.',
+        ),
+        'phone',
+        Level.amber,
+      ),
+    ],
+    asset: 'PR-KICKS',
+    facts: [
+      Tx('From about 28 weeks, learn your baby\'s usual pattern of movements.', 'Kuanzia wiki 28 hivi, jifunze tabia ya kawaida ya mitikisiko ya mtoto wako.'),
+      Tx(
+        'Fewer movements than usual: contact a health worker today, not tomorrow.',
+        'Mitikisiko michache kuliko kawaida: wasiliana na mhudumu wa afya leo, si kesho.',
+      ),
+    ],
+    related: ['danger-preg', 'sleep-preg'],
+    sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)'],
+  ),
+  Lesson(
+    'labour',
+    'preg',
+    'guide',
+    'pregnant',
+    2,
+    Tx('Signs of labour', 'Dalili za uchungu'),
+    [
+      LessonStep(
+        Tx('Regular, painful tightenings that get stronger and closer together.', 'Maumivu ya tumbo yanayokuja kwa mpangilio na kuongezeka.'),
+        'clock',
+        null,
+      ),
+      LessonStep(Tx('A show of mucus with a little blood.', 'Ute wenye damu kidogo.'), 'mother_belly', null),
+      LessonStep(Tx('Your water breaks: go to the facility, even without pain.', 'Chupa ikipasuka: nenda kituoni hata bila maumivu.'), 'clinic', null),
+      LessonStep(Tx('Heavy bleeding is not normal labour: go now.', 'Damu nyingi si uchungu wa kawaida: nenda sasa.'), 'alert', Level.red),
+    ],
+    asset: 'PR-LABOUR',
+    facts: [
+      Tx(
+        'Regular tightenings that get stronger and closer mean labour is starting.',
+        'Mikazo ya mara kwa mara inayoongezeka nguvu na kukaribiana maana yake uchungu unaanza.',
+      ),
+      Tx(
+        'Water breaking: go to the facility, even without pain. Heavy bleeding: go now.',
+        'Maji kupasuka: nenda kituoni, hata bila maumivu. Damu nyingi: nenda sasa.',
+      ),
+    ],
+    related: ['birth-plan', 'danger-preg'],
+    sources: [
+      'WHO recommendations: intrapartum care for a positive childbirth experience (2018)',
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+    ],
+  ),
+  Lesson(
+    'eat-well',
+    'nutri',
+    'guide',
+    'all',
+    3,
+    Tx('Eating well, the East African way', 'Lishe bora kwa vyakula vya nyumbani'),
+    [
+      LessonStep(Tx('Add beans, lentils or groundnuts to one meal every day.', 'Ongeza maharage, dengu au karanga kwenye mlo mmoja kila siku.'), 'plate', null),
+      LessonStep(Tx('Eat dark green leaves like mchicha or sukuma wiki.', 'Kula mboga za majani kama mchicha au sukuma wiki.'), 'greens', null),
+      LessonStep(Tx('Small fish like dagaa give protein and calcium.', 'Samaki wadogo kama dagaa wana protini na kalsiamu.'), 'fish', null),
+      LessonStep(
+        Tx('Eat a fruit with meals to help your body use iron.', 'Kula tunda pamoja na chakula kusaidia mwili kutumia madini ya chuma.'),
+        'fruit',
+        null,
+      ),
+    ],
+    asset: 'NU-EAT',
+    facts: [
+      Tx(
+        'Every day, add beans or groundnuts, dark green leaves and small fish.',
+        'Kila siku, ongeza maharage au karanga, mboga za kijani kibichi na samaki wadogo.',
+      ),
+      Tx('A fruit with meals helps your body use iron.', 'Tunda pamoja na mlo husaidia mwili kutumia madini ya chuma.'),
+    ],
+    related: ['ifa', 'solids'],
+    sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)'],
+  ),
+  Lesson(
+    'ifa',
+    'nutri',
+    'audio',
+    'all',
+    2,
+    Tx('Iron and folic acid tablets', 'Vidonge vya madini ya chuma na foliki'),
+    [
+      LessonStep(Tx('Take one tablet every day, as your clinic prescribed.', 'Meza kidonge kimoja kila siku, kama kliniki ilivyokuandikia.'), 'pill', null),
+      LessonStep(Tx('Take it with water or juice, not with tea or coffee.', 'Meza kwa maji au juisi, si kwa chai au kahawa.'), 'glass', null),
+      LessonStep(Tx('Dark stools are normal. Mild nausea often passes.', 'Choo cheusi ni kawaida. Kichefuchefu kidogo hupita.'), 'talk', null),
+      LessonStep(Tx('If you forget a day, continue the next day. Do not take two.', 'Ukisahau siku moja, endelea kesho. Usimeze viwili.'), 'calendar', null),
+    ],
+    asset: 'NU-IFA',
+    facts: [
+      Tx('Take one tablet a day with water or juice, not tea or coffee.', 'Meza kidonge kimoja kwa siku kwa maji au juisi, si chai wala kahawa.'),
+      Tx('Forgot a day? Continue the next day. Never take two.', 'Umesahau siku moja? Endelea siku inayofuata. Usimeze viwili.'),
+    ],
+    related: ['eat-well', 'danger-preg'],
+    sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)'],
+  ),
+  Lesson(
+    'mood',
+    'nutri',
+    'audio',
+    'all',
+    3,
+    Tx('Feeling low in pregnancy or after birth', 'Huzuni wakati wa ujauzito au baada ya kujifungua'),
+    [
+      LessonStep(
+        Tx('Many mothers feel tired, worried or tearful. You are not alone.', 'Akina mama wengi huchoka, huwa na wasiwasi au hulia. Hauko peke yako.'),
+        'cloud',
+        null,
+      ),
+      LessonStep(Tx('Talk to someone you trust, and rest when you can.', 'Ongea na mtu unayemwamini, na pumzika unapoweza.'), 'talk', null),
+      LessonStep(
+        Tx('If you feel very sad for more than two weeks, tell your health worker.', 'Ukihisi huzuni kubwa kwa zaidi ya wiki mbili, mwambie mhudumu wa afya.'),
+        'clinic',
+        null,
+      ),
+      LessonStep(
+        Tx('If you have thoughts of harming yourself or your baby, get help today.', 'Ukiwa na mawazo ya kujidhuru au kumdhuru mtoto, tafuta msaada leo.'),
+        'phone',
+        Level.amber,
+      ),
+    ],
+    asset: 'NU-MOOD',
+    facts: [
+      Tx('Feeling very sad for more than two weeks: tell your health worker.', 'Huzuni kubwa kwa zaidi ya wiki mbili: mwambie mhudumu wa afya.'),
+      Tx('Thoughts of harming yourself or your baby: get help today.', 'Mawazo ya kujidhuru au kumdhuru mtoto: pata msaada leo.'),
+    ],
+    related: ['spacing', 'eat-well'],
+    sources: [
+      'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)',
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+    ],
+  ),
+  Lesson(
+    'breastfeed',
+    'feed',
+    'video',
+    'all',
+    1,
+    Tx('Breastfeeding from the first hour', 'Kunyonyesha tangu saa ya kwanza'),
+    [
+      LessonStep(
+        Tx(
+          'Hold baby skin-to-skin and start breastfeeding within one hour of birth.',
+          'Mweke mtoto ngozi kwa ngozi na anza kunyonyesha ndani ya saa moja baada ya kuzaliwa.',
+        ),
+        'mother_baby',
+        null,
+      ),
+      LessonStep(Tx('The first yellow milk (colostrum) protects your baby.', 'Maziwa ya kwanza ya njano yanamkinga mtoto.'), 'breastfeed', null),
+      LessonStep(
+        Tx('Give breast milk only, with no water or other food, until 6 months.', 'Mpe maziwa ya mama pekee, bila maji wala chakula kingine, hadi miezi 6.'),
+        'breastfeed',
+        null,
+      ),
+      LessonStep(
+        Tx('Feed whenever baby wants, day and night, at least 8 times a day.', 'Nyonyesha kila mtoto anapotaka, mchana na usiku, angalau mara 8 kwa siku.'),
+        'clock',
+        null,
+      ),
+    ],
+    asset: 'BF-FIRST',
+    facts: [
+      Tx('Start breastfeeding within one hour of birth, skin-to-skin.', 'Anza kunyonyesha ndani ya saa moja baada ya kuzaliwa, ngozi kwa ngozi.'),
+      Tx('Breast milk only until 6 months, at least 8 feeds a day.', 'Maziwa ya mama pekee hadi miezi 6, angalau mara 8 kwa siku.'),
+    ],
+    related: ['attach', 'bf-positions', 'expressing'],
+    sources: [
+      'WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)',
+      'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)',
+    ],
+  ),
+  Lesson(
+    'attach',
+    'feed',
+    'guide',
+    'baby',
+    2,
+    Tx('Good attachment at the breast', 'Kunyonya kwa usahihi'),
+    [
+      LessonStep(Tx('Baby\'s chin touches the breast and the mouth is wide open.', 'Kidevu cha mtoto kinagusa titi na mdomo uko wazi.'), 'latch', null),
+      LessonStep(
+        Tx('More of the dark area shows above the lip than below.', 'Sehemu nyeusi ya titi inaonekana zaidi juu ya mdomo kuliko chini.'),
+        'latch',
+        null,
+      ),
+      LessonStep(Tx('You hear slow, deep sucks and swallowing.', 'Unasikia mivuto ya polepole na kumeza.'), 'breastfeed', null),
+      LessonStep(
+        Tx(
+          'Pain or cracked nipples: ask a health worker to check the attachment.',
+          'Maumivu au chuchu kupasuka: muombe mhudumu wa afya aangalie unavyonyonyesha.',
+        ),
+        'talk',
+        null,
+      ),
+    ],
+    asset: 'BF-LATCH',
+    facts: [
+      Tx('Mouth wide open, chin on the breast, slow deep sucks.', 'Mdomo wazi sana, kidevu kwenye titi, kunyonya taratibu kwa kina.'),
+      Tx('Pain or cracked nipples: ask a health worker to check the attachment.', 'Maumivu au chuchu kupasuka: muombe mhudumu wa afya aangalie unyonyaji.'),
+    ],
+    related: ['bf-positions', 'breastfeed', 'expressing'],
+    sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)'],
+  ),
+  Lesson(
+    'solids',
+    'feed',
+    'guide',
+    'baby',
+    3,
+    Tx('Starting foods at 6 months', 'Kuanza vyakula akiwa na miezi 6'),
+    [
+      LessonStep(Tx('At 6 months, keep breastfeeding and add soft foods.', 'Akifikisha miezi 6, endelea kunyonyesha na ongeza vyakula laini.'), 'bowl', null),
+      LessonStep(
+        Tx('Start with thick porridge (uji) with groundnut or dagaa powder.', 'Anza na uji mzito ulioongezwa unga wa karanga au dagaa.'),
+        'bowl',
+        null,
+      ),
+      LessonStep(Tx('Add mashed banana, avocado, pumpkin and well-cooked beans.', 'Ongeza ndizi, parachichi, maboga na maharage yaliyopondwa.'), 'fruit', null),
+      LessonStep(
+        Tx('Wash hands and use a clean cup and spoon. Avoid feeding bottles.', 'Nawa mikono na tumia kikombe na kijiko safi. Epuka chupa.'),
+        'hands',
+        null,
+      ),
+    ],
+    asset: 'BF-SOLIDS',
+    facts: [
+      Tx('At 6 months, keep breastfeeding and add thick porridge and soft foods.', 'Kwa miezi 6, endelea kunyonyesha na ongeza uji mzito na vyakula laini.'),
+      Tx('Use clean hands, a cup and a spoon. Avoid feeding bottles.', 'Tumia mikono safi, kikombe na kijiko. Epuka chupa za kunyonyeshea.'),
+    ],
+    related: ['eat-well', 'hygiene'],
+    sources: ['WHO guideline for complementary feeding of infants and young children 6–23 months of age (2023)'],
+  ),
+  Lesson(
+    'warm',
+    'newborn',
+    'guide',
+    'all',
+    2,
+    Tx('Keeping your newborn warm', 'Kumweka mtoto mchanga katika joto'),
+    [
+      LessonStep(
+        Tx('Dry baby straight after birth and hold them skin-to-skin.', 'Mkaushe mtoto mara baada ya kuzaliwa na mkumbatie ngozi kwa ngozi.'),
+        'mother_baby',
+        null,
+      ),
+      LessonStep(Tx('Dress baby in one more layer than you, with a hat.', 'Mvalishe mtoto nguo moja zaidi yako, na kofia.'), 'baby_hat', null),
+      LessonStep(Tx('Wait at least 24 hours before the first bath.', 'Subiri angalau saa 24 kabla ya kumwogesha mara ya kwanza.'), 'calendar', null),
+      LessonStep(
+        Tx('Cold hands, feet and body: warm baby and see a health worker today.', 'Mikono, miguu na mwili wa baridi: mpe joto na muone mhudumu wa afya leo.'),
+        'thermo',
+        Level.amber,
+      ),
+    ],
+    asset: 'NB-WARM',
+    facts: [
+      Tx('Skin-to-skin, a hat and one more layer keep your baby warm.', 'Ngozi kwa ngozi, kofia na nguo moja zaidi humpa mtoto joto.'),
+      Tx('Cold hands, feet and body: warm baby and see a health worker today.', 'Mikono, miguu na mwili baridi: mpe mtoto joto na muone mhudumu wa afya leo.'),
+    ],
+    related: ['kmc', 'safe-sleep', 'danger-baby'],
+    sources: [
+      'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)',
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+    ],
+  ),
+  Lesson(
+    'cord',
+    'newborn',
+    'audio',
+    'all',
+    2,
+    Tx('Caring for the cord', 'Kutunza kitovu'),
+    [
+      LessonStep(
+        Tx('Keep the cord clean and dry. Wash your hands before touching it.', 'Weka kitovu kisafi na kikavu. Nawa mikono kabla ya kukigusa.'),
+        'hands',
+        null,
+      ),
+      LessonStep(Tx('Do not put anything on the cord.', 'Usiweke kitu chochote kwenye kitovu.'), 'cord', null),
+      LessonStep(Tx('Fold the nappy below the cord.', 'Kunja nepi chini ya kitovu.'), 'cord', null),
+      LessonStep(
+        Tx('Redness, pus or a bad smell: see a health worker today.', 'Wekundu, usaha au harufu mbaya: muone mhudumu wa afya leo.'),
+        'clinic',
+        Level.amber,
+      ),
+    ],
+    asset: 'NB-CORD',
+    facts: [
+      Tx('Keep the cord clean and dry, and put nothing on it.', 'Kiweke kitovu kisafi na kikavu, na usipake chochote.'),
+      Tx('Redness, pus or a bad smell: see a health worker today.', 'Wekundu, usaha au harufu mbaya: muone mhudumu wa afya leo.'),
+    ],
+    related: ['hygiene', 'danger-baby'],
+    sources: ['WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)'],
+  ),
+  Lesson(
+    'danger-baby',
+    'newborn',
+    'video',
+    'all',
+    1,
+    Tx('Danger signs in babies', 'Dalili za hatari kwa mtoto'),
+    [
+      LessonStep(Tx('Not able to breastfeed, or vomiting everything.', 'Hawezi kunyonya, au anatapika kila kitu.'), 'breastfeed', Level.red),
+      LessonStep(Tx('Fits, or very sleepy and hard to wake.', 'Degedege, au amelegea na ni vigumu kumwamsha.'), 'baby_back', Level.red),
+      LessonStep(Tx('Fast breathing, or the chest pulling in.', 'Anapumua haraka, au kifua kinavutika ndani.'), 'baby_back', Level.red),
+      LessonStep(
+        Tx('Fever or feeling cold, especially before 2 months: go to the facility now.', 'Homa au baridi, hasa kabla ya miezi 2: nenda kituoni sasa.'),
+        'thermo',
+        Level.red,
+      ),
+    ],
+    asset: 'NB-DANGER',
+    facts: [
+      Tx(
+        'Not feeding, fits, very sleepy, fast breathing or chest pulling in: go now.',
+        'Hanyonyi, degedege, usingizi mzito, kupumua haraka au kifua kuvutika: nenda sasa.',
+      ),
+      Tx('Fever or feeling cold before 2 months: go to the facility now.', 'Homa au baridi kabla ya miezi 2: nenda kituoni sasa.'),
+    ],
+    related: ['warm', 'cord', 'breastfeed'],
+    sources: [
+      'WHO Integrated Management of Childhood Illness chart booklet (2014)',
+      'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)',
+    ],
+  ),
+  Lesson(
+    'hygiene',
+    'newborn',
+    'guide',
+    'all',
+    2,
+    Tx('Handwashing and safe water', 'Kunawa mikono na maji salama'),
+    [
+      LessonStep(
+        Tx('Wash hands with soap after the toilet and before feeding or cooking.', 'Nawa mikono kwa sabuni baada ya choo na kabla ya kulisha au kupika.'),
+        'hands',
+        null,
+      ),
+      LessonStep(Tx('Boil or treat drinking water for the family.', 'Chemsha au tibu maji ya kunywa ya familia.'), 'glass', null),
+      LessonStep(Tx('Keep baby\'s cups, spoons and cloths clean.', 'Weka vikombe, vijiko na vitambaa vya mtoto safi.'), 'bowl', null),
+      LessonStep(Tx('Sleep under a treated mosquito net with your baby.', 'Lala na mtoto ndani ya chandarua chenye dawa.'), 'net', null),
+    ],
+    asset: 'NB-HYG',
+    facts: [
+      Tx('Wash hands with soap after the toilet and before feeding or cooking.', 'Nawa mikono kwa sabuni baada ya choo na kabla ya kulisha au kupika.'),
+      Tx('Boil or treat drinking water, and sleep under a treated net.', 'Chemsha au tibu maji ya kunywa, na lala ndani ya chandarua chenye dawa.'),
+    ],
+    related: ['cord', 'solids'],
+    sources: ['WHO Integrated Management of Childhood Illness chart booklet (2014)'],
+  ),
+  Lesson(
+    'spacing',
+    'nutri',
+    'guide',
+    'baby',
+    2,
+    Tx('Spacing your next pregnancy', 'Kupanga uzazi'),
+    [
+      LessonStep(
+        Tx(
+          'Waiting at least 2 years before the next pregnancy is healthier for you and your baby.',
+          'Kusubiri angalau miaka 2 kabla ya ujauzito mwingine ni bora kwako na kwa mtoto.',
+        ),
+        'calendar',
+        null,
+      ),
+      LessonStep(
+        Tx(
+          'Breastfeeding alone is not reliable protection after 6 months or once your period returns.',
+          'Kunyonyesha pekee si kinga ya kuaminika baada ya miezi 6 au hedhi ikirudi.',
+        ),
+        'breastfeed',
+        null,
+      ),
+      LessonStep(
+        Tx('Ask about family planning at your postnatal or child clinic visit.', 'Uliza kuhusu uzazi wa mpango kliniki ya baada ya kujifungua au ya mtoto.'),
+        'talk',
+        null,
+      ),
+      LessonStep(Tx('Many methods are safe while breastfeeding.', 'Njia nyingi ni salama wakati wa kunyonyesha.'), 'pill', null),
+    ],
+    asset: 'NU-SPACE',
+    facts: [
+      Tx('Waiting at least 2 years before the next pregnancy is healthier.', 'Kusubiri angalau miaka 2 kabla ya ujauzito mwingine ni bora kwa afya.'),
+      Tx('Ask about family planning at your postnatal or child clinic visit.', 'Uliza kuhusu uzazi wa mpango kliniki ya baada ya kujifungua au ya mtoto.'),
+    ],
+    related: ['breastfeed', 'mood'],
+    sources: [
+      'Report of a WHO technical consultation on birth spacing (2005)',
+      'WHO recommendations on maternal and newborn care for a positive postnatal experience (2022)',
+    ],
+  ),
+  Lesson(
+    'sleep-preg',
+    'preg',
+    'guide',
+    'pregnant',
+    2,
+    Tx('Sleeping well in pregnancy', 'Kulala vizuri wakati wa ujauzito'),
+    [
+      LessonStep(Tx('From 28 weeks, go to sleep on your side, left or right.', 'Kuanzia wiki 28, lala kwa ubavu, kushoto au kulia.'), 'lie_left', null),
+      LessonStep(Tx('If you wake up on your back, just turn onto your side.', 'Ukiamka umelala chali, geuka tu ulale kwa ubavu.'), 'lie_left', null),
+      LessonStep(Tx('Sleep under a treated mosquito net every night.', 'Lala ndani ya chandarua chenye dawa kila usiku.'), 'net', null),
+      LessonStep(Tx('Rest in the shade in the day when you can.', 'Pumzika kivulini mchana unapoweza.'), 'mother_belly', null),
+    ],
+    asset: 'PR-SLEEP',
+    facts: [
+      Tx('From 28 weeks, go to sleep on your side.', 'Kuanzia wiki 28, lala kwa ubavu.'),
+      Tx('Woke up on your back? Just turn onto your side.', 'Umeamka chali? Geuka tu ulale kwa ubavu.'),
+    ],
+    related: ['kicks', 'danger-preg'],
+    sources: ['WHO recommendations on antenatal care for a positive pregnancy experience (2016)'],
+  ),
+  Lesson(
+    'bp-preg',
+    'preg',
+    'guide',
+    'pregnant',
+    2,
+    Tx('Blood pressure in pregnancy', 'Shinikizo la damu wakati wa ujauzito'),
+    [
+      LessonStep(
+        Tx('High blood pressure can come with no signs at all. Have it measured.', 'Shinikizo la juu linaweza kuja bila dalili yoyote. Pimwa.'),
+        'clinic',
+        null,
+      ),
+      LessonStep(Tx('140/90 or higher: see a health worker within 24 hours.', '140/90 au zaidi: muone mhudumu wa afya ndani ya saa 24.'), 'alert', null),
+      LessonStep(
+        Tx(
+          'High blood pressure with headache, blurred vision, pain under the ribs or a swollen face: go now.',
+          'Shinikizo la juu pamoja na kichwa kuuma, kuona ukungu, maumivu chini ya mbavu au uso kuvimba: nenda sasa.',
+        ),
+        'headache',
+        Level.red,
+      ),
+      LessonStep(
+        Tx('From 20 weeks, have it measured every week by your CHW or clinic.', 'Kuanzia wiki 20, pimwa kila wiki na mhudumu wa jamii au kliniki.'),
+        'calendar',
+        null,
+      ),
+    ],
+    asset: 'PR-BP',
+    facts: [
+      Tx(
+        'High blood pressure can have no signs. Have it measured weekly from 20 weeks.',
+        'Shinikizo la juu linaweza kuwa bila dalili. Pimwa kila wiki kuanzia wiki 20.',
+      ),
+      Tx(
+        'High pressure with headache, blurred vision or a swollen face: go now.',
+        'Shinikizo la juu pamoja na kichwa kuuma, kuona ukungu au uso kuvimba: nenda sasa.',
+      ),
+    ],
+    related: ['danger-preg', 'sleep-preg'],
+    sources: [
+      'WHO recommendations on antenatal care for a positive pregnancy experience (2016)',
+      'WHO Pregnancy, childbirth, postpartum and newborn care: a guide for essential practice (3rd ed.) (2015)',
+    ],
+  ),
+  Lesson(
+    'bf-positions',
+    'feed',
+    'guide',
+    'all',
+    2,
+    Tx('Breastfeeding positions', 'Mikao ya kunyonyesha'),
+    [
+      LessonStep(
+        Tx(
+          'Cradle hold: baby\'s whole body faces you, ear, shoulder and hip in a line.',
+          'Mkao wa kubeba: mwili wote wa mtoto unakuelekea, sikio, bega na nyonga katika mstari mmoja.',
+        ),
+        'breastfeed',
+        null,
+      ),
+      LessonStep(
+        Tx(
+          'Cross-cradle hold: your other arm supports the neck and shoulders. Good for newborns.',
+          'Mkao wa kubeba kwa mkono mwingine: mkono wako mwingine unashika shingo na mabega. Unafaa kwa watoto wachanga.',
+        ),
+        'latch',
+        null,
+      ),
+      LessonStep(
+        Tx(
+          'Lying on your side helps after a caesarean or at night. Keep pillows away from baby.',
+          'Kulala kwa ubavu kunasaidia baada ya upasuaji au usiku. Weka mito mbali na mtoto.',
+        ),
+        'mother_baby',
+        null,
+      ),
+      LessonStep(Tx('Twins: hold one baby under each arm, on a pillow.', 'Mapacha: beba mtoto mmoja chini ya kila mkono, juu ya mto.'), 'breastfeed', null),
+    ],
+    asset: 'BF-POS',
+    facts: [
+      Tx('Baby\'s ear, shoulder and hip in one line, whole body facing you.', 'Sikio, bega na nyonga ya mtoto katika mstari mmoja, mwili wote ukikutazama.'),
+      Tx('Feeding lying down? Keep pillows away from baby\'s face.', 'Unanyonyesha umelala? Weka mito mbali na uso wa mtoto.'),
+    ],
+    related: ['attach', 'expressing'],
+    sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)'],
+  ),
+  Lesson(
+    'expressing',
+    'feed',
+    'guide',
+    'all',
+    3,
+    Tx('Expressing milk by hand', 'Kukamua maziwa kwa mkono'),
+    [
+      LessonStep(Tx('Wash your hands and use a clean, wide cup.', 'Nawa mikono na tumia kikombe kisafi na kipana.'), 'hands', null),
+      LessonStep(
+        Tx(
+          'Put your thumb and finger at the edge of the dark area, press back, then together. Do not squeeze the nipple.',
+          'Weka kidole gumba na kidole kingine pembeni mwa sehemu nyeusi, bonyeza kuelekea ndani, kisha bana. Usibane chuchu.',
+        ),
+        'glass',
+        null,
+      ),
+      LessonStep(
+        Tx('Cover the milk and keep it cool. Use it within 6 hours.', 'Funika maziwa na yaweke mahali penye ubaridi. Yatumie ndani ya saa 6.'),
+        'clock',
+        null,
+      ),
+      LessonStep(
+        Tx(
+          'Feed from a small open cup, with baby sitting up. Do not use a bottle.',
+          'Mlishe kwa kikombe kidogo kilicho wazi, mtoto akiwa amekaa wima. Usitumie chupa.',
+        ),
+        'glass',
+        null,
+      ),
+    ],
+    asset: 'BF-EXP',
+    facts: [
+      Tx('Press at the edge of the dark area. Never squeeze the nipple.', 'Bonyeza pembeni mwa sehemu nyeusi. Usibane chuchu.'),
+      Tx('Cover the milk, keep it cool, and use it within 6 hours.', 'Funika maziwa, yaweke mahali penye ubaridi, na yatumie ndani ya saa 6.'),
+    ],
+    related: ['breastfeed', 'kmc'],
+    sources: ['WHO/UNICEF Infant and young child feeding counselling: an integrated course (2nd ed.) (2021)'],
+  ),
+  Lesson(
+    'safe-sleep',
+    'newborn',
+    'guide',
+    'all',
+    2,
+    Tx('Safe sleep for your baby', 'Usingizi salama kwa mtoto'),
+    [
+      LessonStep(
+        Tx('Lay baby on the back for every sleep, on a firm, flat place.', 'Mlaze mtoto chali kila anapolala, mahali pagumu na tambarare.'),
+        'baby_back',
+        null,
+      ),
+      LessonStep(
+        Tx('Keep pillows, toys and heavy blankets away from baby\'s face.', 'Weka mito, vitu vya kuchezea na blanketi nzito mbali na uso wa mtoto.'),
+        'baby_hat',
+        null,
+      ),
+      LessonStep(
+        Tx('Keep baby close, in the same room, under a treated net.', 'Mweke mtoto karibu, chumba kimoja nawe, ndani ya chandarua chenye dawa.'),
+        'net',
+        null,
+      ),
+      LessonStep(Tx('Nobody smokes in the house or near baby.', 'Mtu yeyote asivute sigara ndani ya nyumba wala karibu na mtoto.'), 'alert', null),
+    ],
+    asset: 'NB-SLEEP',
+    facts: [
+      Tx('Lay baby on the back for every sleep, on a firm, flat place.', 'Mlaze mtoto chali kila anapolala, mahali pagumu na tambarare.'),
+      Tx('Keep pillows and heavy blankets away, and no smoking near baby.', 'Weka mito na blanketi nzito mbali, na mtu asivute sigara karibu na mtoto.'),
+    ],
+    related: ['warm', 'kmc'],
+    sources: [],
+  ),
+  Lesson(
+    'kmc',
+    'newborn',
+    'guide',
+    'all',
+    3,
+    Tx('Kangaroo care for small babies', 'Malezi ya kangaruu kwa watoto wadogo'),
+    [
+      LessonStep(
+        Tx(
+          'A small or early baby stays warm best skin-to-skin, upright on your chest, in a nappy and hat.',
+          'Mtoto mdogo au aliyezaliwa kabla ya wakati hupata joto zaidi akiwa ngozi kwa ngozi, wima kifuani kwako, akiwa na nepi na kofia.',
+        ),
+        'mother_baby',
+        null,
+      ),
+      LessonStep(
+        Tx('Tie a kanga around you both so baby is held safely, face free.', 'Funga kanga kuwazunguka wote wawili ili mtoto akae salama, uso wazi.'),
+        'mother_baby',
+        null,
+      ),
+      LessonStep(Tx('Your partner or a grandmother can take turns.', 'Mwenzako au bibi anaweza kupokezana nawe.'), 'talk', null),
+      LessonStep(Tx('Breastfeed often, at least every 2 to 3 hours.', 'Mnyonyeshe mara nyingi, angalau kila saa 2 hadi 3.'), 'clock', null),
+    ],
+    asset: 'NB-KMC',
+    facts: [
+      Tx('A small baby stays warm best skin-to-skin, upright on your chest.', 'Mtoto mdogo hupata joto bora ngozi kwa ngozi, wima kifuani mwako.'),
+      Tx('Breastfeed often, at least every 2 to 3 hours.', 'Mnyonyeshe mara nyingi, angalau kila saa 2 hadi 3.'),
+    ],
+    related: ['warm', 'breastfeed', 'expressing'],
+    sources: ['WHO recommendations for care of the preterm or low-birth-weight infant (2022)'],
+  ),
 ];
 
 /// Two quick questions after each lesson (MA-52).
 const quizzes = <String, List<QuizQ>>{
   'danger-preg': [
-    QuizQ(Tx('You see bleeding from the vagina. What do you do?', 'Unaona damu ikitoka ukeni. Ufanye nini?'), [Tx('Go to a facility now', 'Nenda kituoni sasa'), Tx('Rest and wait until tomorrow', 'Pumzika na usubiri hadi kesho'), Tx('Drink herbs', 'Kunywa dawa za mitishamba')], 0, Tx('Bleeding in pregnancy is a danger sign. Go now.', 'Kutokwa damu wakati wa ujauzito ni dalili ya hatari. Nenda sasa.')),
-    QuizQ(Tx('Water is leaking but there is no pain. What do you do?', 'Maji yanatoka lakini hakuna maumivu. Ufanye nini?'), [Tx('Wait for the pain to start', 'Subiri maumivu yaanze'), Tx('Go to a facility now', 'Nenda kituoni sasa'), Tx('Lie down at home', 'Lala nyumbani')], 1, Tx('Leaking water is a danger sign, even without pain.', 'Maji kutoka ni dalili ya hatari, hata bila maumivu.')),
+    QuizQ(
+      Tx('You see bleeding from the vagina. What do you do?', 'Unaona damu ikitoka ukeni. Ufanye nini?'),
+      [
+        Tx('Go to a facility now', 'Nenda kituoni sasa'),
+        Tx('Rest and wait until tomorrow', 'Pumzika na usubiri hadi kesho'),
+        Tx('Drink herbs', 'Kunywa dawa za mitishamba'),
+      ],
+      0,
+      Tx('Bleeding in pregnancy is a danger sign. Go now.', 'Kutokwa damu wakati wa ujauzito ni dalili ya hatari. Nenda sasa.'),
+    ),
+    QuizQ(
+      Tx('Water is leaking but there is no pain. What do you do?', 'Maji yanatoka lakini hakuna maumivu. Ufanye nini?'),
+      [Tx('Wait for the pain to start', 'Subiri maumivu yaanze'), Tx('Go to a facility now', 'Nenda kituoni sasa'), Tx('Lie down at home', 'Lala nyumbani')],
+      1,
+      Tx('Leaking water is a danger sign, even without pain.', 'Maji kutoka ni dalili ya hatari, hata bila maumivu.'),
+    ),
   ],
   'birth-plan': [
-    QuizQ(Tx('When should you plan transport for the birth?', 'Upange usafiri wa kujifungua lini?'), [Tx('When labour starts', 'Uchungu ukianza'), Tx('Weeks before, and save money', 'Wiki kadhaa kabla, na weka akiba')], 1, Tx('Plan early so you can leave quickly, day or night.', 'Panga mapema ili uondoke haraka, mchana au usiku.')),
-    QuizQ(Tx('Which of these goes in your bag?', 'Kipi kati ya hivi kiwe kwenye begi lako?'), [Tx('Clinic card and clean cloths', 'Kadi ya kliniki na vitambaa safi'), Tx('A feeding bottle', 'Chupa ya kunyonyeshea')], 0, Tx('Your card helps the midwife. Baby needs only breast milk.', 'Kadi yako inamsaidia mkunga. Mtoto anahitaji maziwa ya mama pekee.')),
+    QuizQ(
+      Tx('When should you plan transport for the birth?', 'Upange usafiri wa kujifungua lini?'),
+      [Tx('When labour starts', 'Uchungu ukianza'), Tx('Weeks before, and save money', 'Wiki kadhaa kabla, na weka akiba')],
+      1,
+      Tx('Plan early so you can leave quickly, day or night.', 'Panga mapema ili uondoke haraka, mchana au usiku.'),
+    ),
+    QuizQ(
+      Tx('Which of these goes in your bag?', 'Kipi kati ya hivi kiwe kwenye begi lako?'),
+      [Tx('Clinic card and clean cloths', 'Kadi ya kliniki na vitambaa safi'), Tx('A feeding bottle', 'Chupa ya kunyonyeshea')],
+      0,
+      Tx('Your card helps the midwife. Baby needs only breast milk.', 'Kadi yako inamsaidia mkunga. Mtoto anahitaji maziwa ya mama pekee.'),
+    ),
   ],
   'kicks': [
-    QuizQ(Tx('How many kicks must you count each day?', 'Uhesabu mateke mangapi kila siku?'), [Tx('Exactly 10', '10 kamili'), Tx('There is no number: know your baby\'s usual pattern', 'Hakuna idadi: ijue tabia ya kawaida ya mtoto wako')], 1, Tx('Learn what is usual for your baby and notice changes.', 'Jifunze kilicho kawaida kwa mtoto wako na tambua mabadiliko.')),
-    QuizQ(Tx('Your baby is moving less than usual. When do you call?', 'Mtoto anacheza kidogo kuliko kawaida. Upige simu lini?'), [Tx('Today', 'Leo'), Tx('Next week at the clinic', 'Wiki ijayo kliniki')], 0, Tx('Fewer movements need a health worker the same day.', 'Mitikisiko michache inahitaji mhudumu wa afya siku hiyo hiyo.')),
+    QuizQ(
+      Tx('How many kicks must you count each day?', 'Uhesabu mateke mangapi kila siku?'),
+      [Tx('Exactly 10', '10 kamili'), Tx('There is no number: know your baby\'s usual pattern', 'Hakuna idadi: ijue tabia ya kawaida ya mtoto wako')],
+      1,
+      Tx('Learn what is usual for your baby and notice changes.', 'Jifunze kilicho kawaida kwa mtoto wako na tambua mabadiliko.'),
+    ),
+    QuizQ(
+      Tx('Your baby is moving less than usual. When do you call?', 'Mtoto anacheza kidogo kuliko kawaida. Upige simu lini?'),
+      [Tx('Today', 'Leo'), Tx('Next week at the clinic', 'Wiki ijayo kliniki')],
+      0,
+      Tx('Fewer movements need a health worker the same day.', 'Mitikisiko michache inahitaji mhudumu wa afya siku hiyo hiyo.'),
+    ),
   ],
   'labour': [
-    QuizQ(Tx('Heavy bleeding during labour is…', 'Kutokwa damu nyingi wakati wa uchungu ni…'), [Tx('Not normal: go now', 'Si kawaida: nenda sasa'), Tx('Part of labour', 'Sehemu ya uchungu')], 0, Tx('A show is a little blood with mucus. Heavy bleeding is a danger sign.', 'Ute wenye damu kidogo ni kawaida. Damu nyingi ni dalili ya hatari.')),
-    QuizQ(Tx('Labour tightenings…', 'Mikazo ya uchungu…'), [Tx('Get stronger and closer together', 'Inaongezeka nguvu na kukaribiana'), Tx('Stay the same all day', 'Inabaki vilevile siku nzima')], 0, Tx('Regular tightenings that get stronger and closer mean labour has started.', 'Mikazo ya mara kwa mara inayoongezeka maana yake uchungu umeanza.')),
+    QuizQ(
+      Tx('Heavy bleeding during labour is…', 'Kutokwa damu nyingi wakati wa uchungu ni…'),
+      [Tx('Not normal: go now', 'Si kawaida: nenda sasa'), Tx('Part of labour', 'Sehemu ya uchungu')],
+      0,
+      Tx('A show is a little blood with mucus. Heavy bleeding is a danger sign.', 'Ute wenye damu kidogo ni kawaida. Damu nyingi ni dalili ya hatari.'),
+    ),
+    QuizQ(
+      Tx('Labour tightenings…', 'Mikazo ya uchungu…'),
+      [Tx('Get stronger and closer together', 'Inaongezeka nguvu na kukaribiana'), Tx('Stay the same all day', 'Inabaki vilevile siku nzima')],
+      0,
+      Tx('Regular tightenings that get stronger and closer mean labour has started.', 'Mikazo ya mara kwa mara inayoongezeka maana yake uchungu umeanza.'),
+    ),
   ],
   'sleep-preg': [
-    QuizQ(Tx('From 28 weeks, how do you go to sleep?', 'Kuanzia wiki 28, ulale vipi?'), [Tx('On my side', 'Kwa ubavu'), Tx('Flat on my back', 'Chali')], 0, Tx('Going to sleep on your side is safer for the baby.', 'Kulala kwa ubavu ni salama zaidi kwa mtoto.')),
-    QuizQ(Tx('You wake up on your back. What do you do?', 'Unaamka umelala chali. Ufanye nini?'), [Tx('Just turn onto your side', 'Geuka tu ulale kwa ubavu'), Tx('Go to the clinic', 'Nenda kliniki')], 0, Tx('No need to worry: just turn.', 'Usiwe na wasiwasi: geuka tu.')),
+    QuizQ(
+      Tx('From 28 weeks, how do you go to sleep?', 'Kuanzia wiki 28, ulale vipi?'),
+      [Tx('On my side', 'Kwa ubavu'), Tx('Flat on my back', 'Chali')],
+      0,
+      Tx('Going to sleep on your side is safer for the baby.', 'Kulala kwa ubavu ni salama zaidi kwa mtoto.'),
+    ),
+    QuizQ(
+      Tx('You wake up on your back. What do you do?', 'Unaamka umelala chali. Ufanye nini?'),
+      [Tx('Just turn onto your side', 'Geuka tu ulale kwa ubavu'), Tx('Go to the clinic', 'Nenda kliniki')],
+      0,
+      Tx('No need to worry: just turn.', 'Usiwe na wasiwasi: geuka tu.'),
+    ),
   ],
   'bp-preg': [
-    QuizQ(Tx('Can high blood pressure come with no signs?', 'Shinikizo la juu linaweza kuja bila dalili?'), [Tx('Yes, so have it measured', 'Ndiyo, kwa hiyo pimwa'), Tx('No, you always feel it', 'Hapana, huhisi daima')], 0, Tx('Many women feel well. Only measuring finds it.', 'Wanawake wengi hujisikia vizuri. Kupima tu ndiko kunakogundua.')),
-    QuizQ(Tx('Your BP is 145/92 and you have a severe headache. What do you do?', 'Shinikizo lako ni 145/92 na una kichwa kikali. Ufanye nini?'), [Tx('Go now', 'Nenda sasa'), Tx('Wait a week', 'Subiri wiki moja')], 0, Tx('High BP with a warning symptom is a danger sign.', 'Shinikizo la juu pamoja na dalili ya onyo ni hatari.')),
+    QuizQ(
+      Tx('Can high blood pressure come with no signs?', 'Shinikizo la juu linaweza kuja bila dalili?'),
+      [Tx('Yes, so have it measured', 'Ndiyo, kwa hiyo pimwa'), Tx('No, you always feel it', 'Hapana, huhisi daima')],
+      0,
+      Tx('Many women feel well. Only measuring finds it.', 'Wanawake wengi hujisikia vizuri. Kupima tu ndiko kunakogundua.'),
+    ),
+    QuizQ(
+      Tx('Your BP is 145/92 and you have a severe headache. What do you do?', 'Shinikizo lako ni 145/92 na una kichwa kikali. Ufanye nini?'),
+      [Tx('Go now', 'Nenda sasa'), Tx('Wait a week', 'Subiri wiki moja')],
+      0,
+      Tx('High BP with a warning symptom is a danger sign.', 'Shinikizo la juu pamoja na dalili ya onyo ni hatari.'),
+    ),
   ],
   'eat-well': [
-    QuizQ(Tx('Which food has a lot of iron?', 'Chakula gani kina madini ya chuma mengi?'), [Tx('Beans and dark green leaves', 'Maharage na mboga za kijani kibichi'), Tx('White rice only', 'Wali mweupe pekee')], 0, Tx('Beans, mchicha and dagaa are rich and affordable.', 'Maharage, mchicha na dagaa ni bora na nafuu.')),
-    QuizQ(Tx('What helps your body use iron from food?', 'Nini kinasaidia mwili kutumia madini ya chuma?'), [Tx('A fruit with the meal', 'Tunda pamoja na mlo'), Tx('Tea with the meal', 'Chai pamoja na mlo')], 0, Tx('Fruit helps; tea makes iron harder to absorb.', 'Tunda linasaidia; chai inazuia madini ya chuma.')),
+    QuizQ(
+      Tx('Which food has a lot of iron?', 'Chakula gani kina madini ya chuma mengi?'),
+      [Tx('Beans and dark green leaves', 'Maharage na mboga za kijani kibichi'), Tx('White rice only', 'Wali mweupe pekee')],
+      0,
+      Tx('Beans, mchicha and dagaa are rich and affordable.', 'Maharage, mchicha na dagaa ni bora na nafuu.'),
+    ),
+    QuizQ(
+      Tx('What helps your body use iron from food?', 'Nini kinasaidia mwili kutumia madini ya chuma?'),
+      [Tx('A fruit with the meal', 'Tunda pamoja na mlo'), Tx('Tea with the meal', 'Chai pamoja na mlo')],
+      0,
+      Tx('Fruit helps; tea makes iron harder to absorb.', 'Tunda linasaidia; chai inazuia madini ya chuma.'),
+    ),
   ],
   'ifa': [
-    QuizQ(Tx('You forgot your tablet yesterday. What do you do?', 'Ulisahau kidonge jana. Ufanye nini?'), [Tx('Take one today as usual', 'Meza kimoja leo kama kawaida'), Tx('Take two today', 'Meza viwili leo')], 0, Tx('Never take two to catch up.', 'Usimeze viwili kufidia.')),
-    QuizQ(Tx('Take the tablet with…', 'Meza kidonge kwa…'), [Tx('Water or juice', 'Maji au juisi'), Tx('Tea or coffee', 'Chai au kahawa')], 0, Tx('Tea and coffee block iron.', 'Chai na kahawa huzuia madini ya chuma.')),
+    QuizQ(
+      Tx('You forgot your tablet yesterday. What do you do?', 'Ulisahau kidonge jana. Ufanye nini?'),
+      [Tx('Take one today as usual', 'Meza kimoja leo kama kawaida'), Tx('Take two today', 'Meza viwili leo')],
+      0,
+      Tx('Never take two to catch up.', 'Usimeze viwili kufidia.'),
+    ),
+    QuizQ(
+      Tx('Take the tablet with…', 'Meza kidonge kwa…'),
+      [Tx('Water or juice', 'Maji au juisi'), Tx('Tea or coffee', 'Chai au kahawa')],
+      0,
+      Tx('Tea and coffee block iron.', 'Chai na kahawa huzuia madini ya chuma.'),
+    ),
   ],
   'mood': [
-    QuizQ(Tx('You have felt very sad for more than two weeks. What do you do?', 'Umehisi huzuni kubwa kwa zaidi ya wiki mbili. Ufanye nini?'), [Tx('Tell your health worker', 'Mwambie mhudumu wa afya'), Tx('Keep it to yourself', 'Kaa nalo mwenyewe')], 0, Tx('It is common and help works. You are not alone.', 'Ni jambo la kawaida na msaada unafanya kazi. Hauko peke yako.')),
-    QuizQ(Tx('Thoughts of harming yourself or your baby mean…', 'Mawazo ya kujidhuru au kumdhuru mtoto maana yake…'), [Tx('Get help today', 'Pata msaada leo'), Tx('Wait and see', 'Subiri uone')], 0, Tx('Call your clinic or someone you trust today.', 'Piga simu kliniki au mtu unayemwamini leo.')),
+    QuizQ(
+      Tx('You have felt very sad for more than two weeks. What do you do?', 'Umehisi huzuni kubwa kwa zaidi ya wiki mbili. Ufanye nini?'),
+      [Tx('Tell your health worker', 'Mwambie mhudumu wa afya'), Tx('Keep it to yourself', 'Kaa nalo mwenyewe')],
+      0,
+      Tx('It is common and help works. You are not alone.', 'Ni jambo la kawaida na msaada unafanya kazi. Hauko peke yako.'),
+    ),
+    QuizQ(
+      Tx('Thoughts of harming yourself or your baby mean…', 'Mawazo ya kujidhuru au kumdhuru mtoto maana yake…'),
+      [Tx('Get help today', 'Pata msaada leo'), Tx('Wait and see', 'Subiri uone')],
+      0,
+      Tx('Call your clinic or someone you trust today.', 'Piga simu kliniki au mtu unayemwamini leo.'),
+    ),
   ],
   'spacing': [
-    QuizQ(Tx('How long is healthier to wait before the next pregnancy?', 'Ni bora kusubiri muda gani kabla ya ujauzito mwingine?'), [Tx('At least 2 years', 'Angalau miaka 2'), Tx('3 months', 'Miezi 3')], 0, Tx('Spacing protects you and your next baby.', 'Kupanga uzazi kunakulinda wewe na mtoto ajaye.')),
-    QuizQ(Tx('Is breastfeeding alone reliable protection after 6 months?', 'Kunyonyesha pekee ni kinga ya kuaminika baada ya miezi 6?'), [Tx('No', 'Hapana'), Tx('Yes', 'Ndiyo')], 0, Tx('Ask about a method at your clinic visit.', 'Uliza kuhusu njia kliniki.')),
+    QuizQ(
+      Tx('How long is healthier to wait before the next pregnancy?', 'Ni bora kusubiri muda gani kabla ya ujauzito mwingine?'),
+      [Tx('At least 2 years', 'Angalau miaka 2'), Tx('3 months', 'Miezi 3')],
+      0,
+      Tx('Spacing protects you and your next baby.', 'Kupanga uzazi kunakulinda wewe na mtoto ajaye.'),
+    ),
+    QuizQ(
+      Tx('Is breastfeeding alone reliable protection after 6 months?', 'Kunyonyesha pekee ni kinga ya kuaminika baada ya miezi 6?'),
+      [Tx('No', 'Hapana'), Tx('Yes', 'Ndiyo')],
+      0,
+      Tx('Ask about a method at your clinic visit.', 'Uliza kuhusu njia kliniki.'),
+    ),
   ],
   'breastfeed': [
-    QuizQ(Tx('When should breastfeeding start?', 'Kunyonyesha kuanze lini?'), [Tx('Within one hour of birth', 'Ndani ya saa moja baada ya kuzaliwa'), Tx('After the first day', 'Baada ya siku ya kwanza')], 0, Tx('The first yellow milk protects your baby.', 'Maziwa ya kwanza ya njano yanamlinda mtoto.')),
-    QuizQ(Tx('Before 6 months, does baby need water?', 'Kabla ya miezi 6, mtoto anahitaji maji?'), [Tx('No, breast milk only', 'Hapana, maziwa ya mama pekee'), Tx('Yes, when it is hot', 'Ndiyo, kukiwa na joto')], 0, Tx('Breast milk has all the water baby needs.', 'Maziwa ya mama yana maji yote anayohitaji mtoto.')),
+    QuizQ(
+      Tx('When should breastfeeding start?', 'Kunyonyesha kuanze lini?'),
+      [Tx('Within one hour of birth', 'Ndani ya saa moja baada ya kuzaliwa'), Tx('After the first day', 'Baada ya siku ya kwanza')],
+      0,
+      Tx('The first yellow milk protects your baby.', 'Maziwa ya kwanza ya njano yanamlinda mtoto.'),
+    ),
+    QuizQ(
+      Tx('Before 6 months, does baby need water?', 'Kabla ya miezi 6, mtoto anahitaji maji?'),
+      [Tx('No, breast milk only', 'Hapana, maziwa ya mama pekee'), Tx('Yes, when it is hot', 'Ndiyo, kukiwa na joto')],
+      0,
+      Tx('Breast milk has all the water baby needs.', 'Maziwa ya mama yana maji yote anayohitaji mtoto.'),
+    ),
   ],
   'attach': [
-    QuizQ(Tx('In a good latch, baby\'s mouth is…', 'Mtoto akinyonya vizuri, mdomo wake…'), [Tx('Wide open, chin touching the breast', 'Uko wazi sana, kidevu kinagusa titi'), Tx('On the nipple only', 'Uko kwenye chuchu tu')], 0, Tx('A deep latch prevents pain and gives more milk.', 'Kunyonya kwa kina huzuia maumivu na kutoa maziwa zaidi.')),
-    QuizQ(Tx('Your nipples are cracked and painful. What helps?', 'Chuchu zimepasuka na zinauma. Nini kinasaidia?'), [Tx('Ask a health worker to check the latch', 'Muombe mhudumu wa afya aangalie unyonyaji'), Tx('Stop breastfeeding', 'Acha kunyonyesha')], 0, Tx('Pain usually means the latch needs fixing.', 'Maumivu mara nyingi yanamaanisha unyonyaji unahitaji kurekebishwa.')),
+    QuizQ(
+      Tx('In a good latch, baby\'s mouth is…', 'Mtoto akinyonya vizuri, mdomo wake…'),
+      [Tx('Wide open, chin touching the breast', 'Uko wazi sana, kidevu kinagusa titi'), Tx('On the nipple only', 'Uko kwenye chuchu tu')],
+      0,
+      Tx('A deep latch prevents pain and gives more milk.', 'Kunyonya kwa kina huzuia maumivu na kutoa maziwa zaidi.'),
+    ),
+    QuizQ(
+      Tx('Your nipples are cracked and painful. What helps?', 'Chuchu zimepasuka na zinauma. Nini kinasaidia?'),
+      [Tx('Ask a health worker to check the latch', 'Muombe mhudumu wa afya aangalie unyonyaji'), Tx('Stop breastfeeding', 'Acha kunyonyesha')],
+      0,
+      Tx('Pain usually means the latch needs fixing.', 'Maumivu mara nyingi yanamaanisha unyonyaji unahitaji kurekebishwa.'),
+    ),
   ],
   'solids': [
-    QuizQ(Tx('At 6 months, porridge should be…', 'Kwa miezi 6, uji uwe…'), [Tx('Thick enough to stay on a spoon', 'Mzito wa kubaki kwenye kijiko'), Tx('Thin and watery', 'Mwepesi wa maji')], 0, Tx('Thick porridge gives baby more energy.', 'Uji mzito unampa mtoto nguvu zaidi.')),
-    QuizQ(Tx('After 6 months, does breastfeeding stop?', 'Baada ya miezi 6, kunyonyesha kuache?'), [Tx('No, keep breastfeeding', 'Hapana, endelea kunyonyesha'), Tx('Yes', 'Ndiyo')], 0, Tx('Keep breastfeeding to 2 years and beyond.', 'Endelea kunyonyesha hadi miaka 2 na zaidi.')),
+    QuizQ(
+      Tx('At 6 months, porridge should be…', 'Kwa miezi 6, uji uwe…'),
+      [Tx('Thick enough to stay on a spoon', 'Mzito wa kubaki kwenye kijiko'), Tx('Thin and watery', 'Mwepesi wa maji')],
+      0,
+      Tx('Thick porridge gives baby more energy.', 'Uji mzito unampa mtoto nguvu zaidi.'),
+    ),
+    QuizQ(
+      Tx('After 6 months, does breastfeeding stop?', 'Baada ya miezi 6, kunyonyesha kuache?'),
+      [Tx('No, keep breastfeeding', 'Hapana, endelea kunyonyesha'), Tx('Yes', 'Ndiyo')],
+      0,
+      Tx('Keep breastfeeding to 2 years and beyond.', 'Endelea kunyonyesha hadi miaka 2 na zaidi.'),
+    ),
   ],
   'bf-positions': [
-    QuizQ(Tx('In a good position, baby\'s ear, shoulder and hip are…', 'Katika mkao mzuri, sikio, bega na nyonga ya mtoto viko…'), [Tx('In a straight line', 'Katika mstari mmoja'), Tx('Twisted', 'Vimepinda')], 0, Tx('A straight line makes swallowing easy.', 'Mstari mmoja unarahisisha kumeza.')),
-    QuizQ(Tx('Feeding lying down, where are the pillows?', 'Ukinyonyesha umelala, mito iwe wapi?'), [Tx('Away from baby\'s face', 'Mbali na uso wa mtoto'), Tx('Around baby\'s head', 'Kuzunguka kichwa cha mtoto')], 0, Tx('Soft things near the face are not safe.', 'Vitu laini karibu na uso si salama.')),
+    QuizQ(
+      Tx('In a good position, baby\'s ear, shoulder and hip are…', 'Katika mkao mzuri, sikio, bega na nyonga ya mtoto viko…'),
+      [Tx('In a straight line', 'Katika mstari mmoja'), Tx('Twisted', 'Vimepinda')],
+      0,
+      Tx('A straight line makes swallowing easy.', 'Mstari mmoja unarahisisha kumeza.'),
+    ),
+    QuizQ(
+      Tx('Feeding lying down, where are the pillows?', 'Ukinyonyesha umelala, mito iwe wapi?'),
+      [Tx('Away from baby\'s face', 'Mbali na uso wa mtoto'), Tx('Around baby\'s head', 'Kuzunguka kichwa cha mtoto')],
+      0,
+      Tx('Soft things near the face are not safe.', 'Vitu laini karibu na uso si salama.'),
+    ),
   ],
   'expressing': [
-    QuizQ(Tx('Feed expressed milk with…', 'Mlishe maziwa yaliyokamuliwa kwa…'), [Tx('A small open cup', 'Kikombe kidogo kilicho wazi'), Tx('A bottle', 'Chupa')], 0, Tx('Cups are easier to keep clean than bottles.', 'Vikombe ni rahisi kusafisha kuliko chupa.')),
-    QuizQ(Tx('Where do you press?', 'Ubonyeze wapi?'), [Tx('At the edge of the dark area', 'Pembeni mwa sehemu nyeusi'), Tx('On the nipple', 'Kwenye chuchu')], 0, Tx('Squeezing the nipple hurts and gives little milk.', 'Kubana chuchu kunauma na kunatoa maziwa kidogo.')),
+    QuizQ(
+      Tx('Feed expressed milk with…', 'Mlishe maziwa yaliyokamuliwa kwa…'),
+      [Tx('A small open cup', 'Kikombe kidogo kilicho wazi'), Tx('A bottle', 'Chupa')],
+      0,
+      Tx('Cups are easier to keep clean than bottles.', 'Vikombe ni rahisi kusafisha kuliko chupa.'),
+    ),
+    QuizQ(
+      Tx('Where do you press?', 'Ubonyeze wapi?'),
+      [Tx('At the edge of the dark area', 'Pembeni mwa sehemu nyeusi'), Tx('On the nipple', 'Kwenye chuchu')],
+      0,
+      Tx('Squeezing the nipple hurts and gives little milk.', 'Kubana chuchu kunauma na kunatoa maziwa kidogo.'),
+    ),
   ],
   'warm': [
-    QuizQ(Tx('When should the first bath be?', 'Kuoga mara ya kwanza kuwe lini?'), [Tx('After at least 24 hours', 'Baada ya angalau saa 24'), Tx('Straight after birth', 'Mara baada ya kuzaliwa')], 0, Tx('Newborns lose heat fast.', 'Watoto wachanga hupoteza joto haraka.')),
-    QuizQ(Tx('Baby\'s hands and feet feel cold. What do you do?', 'Mikono na miguu ya mtoto ni baridi. Ufanye nini?'), [Tx('Warm baby skin-to-skin and see a health worker today', 'Mpe joto ngozi kwa ngozi na muone mhudumu wa afya leo'), Tx('Put baby near the fire', 'Mweke mtoto karibu na moto')], 0, Tx('Skin-to-skin warms baby safely.', 'Ngozi kwa ngozi humpa mtoto joto kwa usalama.')),
+    QuizQ(
+      Tx('When should the first bath be?', 'Kuoga mara ya kwanza kuwe lini?'),
+      [Tx('After at least 24 hours', 'Baada ya angalau saa 24'), Tx('Straight after birth', 'Mara baada ya kuzaliwa')],
+      0,
+      Tx('Newborns lose heat fast.', 'Watoto wachanga hupoteza joto haraka.'),
+    ),
+    QuizQ(
+      Tx('Baby\'s hands and feet feel cold. What do you do?', 'Mikono na miguu ya mtoto ni baridi. Ufanye nini?'),
+      [
+        Tx('Warm baby skin-to-skin and see a health worker today', 'Mpe joto ngozi kwa ngozi na muone mhudumu wa afya leo'),
+        Tx('Put baby near the fire', 'Mweke mtoto karibu na moto'),
+      ],
+      0,
+      Tx('Skin-to-skin warms baby safely.', 'Ngozi kwa ngozi humpa mtoto joto kwa usalama.'),
+    ),
   ],
   'cord': [
-    QuizQ(Tx('What do you put on the cord?', 'Upake nini kwenye kitovu?'), [Tx('Nothing: keep it clean and dry', 'Hakuna: kiweke safi na kikavu'), Tx('Ash or oil', 'Majivu au mafuta')], 0, Tx('Things put on the cord can cause infection.', 'Vitu vinavyopakwa kwenye kitovu vinaweza kuleta maambukizi.')),
-    QuizQ(Tx('The cord is red and smells bad. What do you do?', 'Kitovu ni chekundu na kina harufu mbaya. Ufanye nini?'), [Tx('See a health worker today', 'Muone mhudumu wa afya leo'), Tx('Wait a week', 'Subiri wiki moja')], 0, Tx('These are signs of infection.', 'Hizi ni dalili za maambukizi.')),
+    QuizQ(
+      Tx('What do you put on the cord?', 'Upake nini kwenye kitovu?'),
+      [Tx('Nothing: keep it clean and dry', 'Hakuna: kiweke safi na kikavu'), Tx('Ash or oil', 'Majivu au mafuta')],
+      0,
+      Tx('Things put on the cord can cause infection.', 'Vitu vinavyopakwa kwenye kitovu vinaweza kuleta maambukizi.'),
+    ),
+    QuizQ(
+      Tx('The cord is red and smells bad. What do you do?', 'Kitovu ni chekundu na kina harufu mbaya. Ufanye nini?'),
+      [Tx('See a health worker today', 'Muone mhudumu wa afya leo'), Tx('Wait a week', 'Subiri wiki moja')],
+      0,
+      Tx('These are signs of infection.', 'Hizi ni dalili za maambukizi.'),
+    ),
   ],
   'danger-baby': [
-    QuizQ(Tx('A 3-week-old baby feels hot. What do you do?', 'Mtoto wa wiki 3 ana homa. Ufanye nini?'), [Tx('Go to a facility now', 'Nenda kituoni sasa'), Tx('Wait until tomorrow', 'Subiri hadi kesho')], 0, Tx('Fever before 2 months is a danger sign.', 'Homa kabla ya miezi 2 ni dalili ya hatari.')),
-    QuizQ(Tx('Baby\'s chest pulls in when breathing. This is…', 'Kifua cha mtoto kinavutika ndani anapopumua. Hii ni…'), [Tx('A danger sign: go now', 'Dalili ya hatari: nenda sasa'), Tx('Normal', 'Kawaida')], 0, Tx('Chest indrawing means baby is working hard to breathe.', 'Kifua kuvutika maana yake mtoto anapumua kwa shida.')),
+    QuizQ(
+      Tx('A 3-week-old baby feels hot. What do you do?', 'Mtoto wa wiki 3 ana homa. Ufanye nini?'),
+      [Tx('Go to a facility now', 'Nenda kituoni sasa'), Tx('Wait until tomorrow', 'Subiri hadi kesho')],
+      0,
+      Tx('Fever before 2 months is a danger sign.', 'Homa kabla ya miezi 2 ni dalili ya hatari.'),
+    ),
+    QuizQ(
+      Tx('Baby\'s chest pulls in when breathing. This is…', 'Kifua cha mtoto kinavutika ndani anapopumua. Hii ni…'),
+      [Tx('A danger sign: go now', 'Dalili ya hatari: nenda sasa'), Tx('Normal', 'Kawaida')],
+      0,
+      Tx('Chest indrawing means baby is working hard to breathe.', 'Kifua kuvutika maana yake mtoto anapumua kwa shida.'),
+    ),
   ],
   'hygiene': [
-    QuizQ(Tx('When do you wash hands with soap?', 'Unawe mikono kwa sabuni lini?'), [Tx('After the toilet and before feeding or cooking', 'Baada ya choo na kabla ya kulisha au kupika'), Tx('Only when they look dirty', 'Zikionekana chafu tu')], 0, Tx('Clean hands prevent diarrhoea.', 'Mikono safi huzuia kuharisha.')),
-    QuizQ(Tx('Drinking water for the family should be…', 'Maji ya kunywa ya familia yawe…'), [Tx('Boiled or treated', 'Yamechemshwa au kutibiwa'), Tx('Straight from the river', 'Moja kwa moja kutoka mtoni')], 0, Tx('Safe water protects the whole family.', 'Maji salama yanailinda familia nzima.')),
+    QuizQ(
+      Tx('When do you wash hands with soap?', 'Unawe mikono kwa sabuni lini?'),
+      [
+        Tx('After the toilet and before feeding or cooking', 'Baada ya choo na kabla ya kulisha au kupika'),
+        Tx('Only when they look dirty', 'Zikionekana chafu tu'),
+      ],
+      0,
+      Tx('Clean hands prevent diarrhoea.', 'Mikono safi huzuia kuharisha.'),
+    ),
+    QuizQ(
+      Tx('Drinking water for the family should be…', 'Maji ya kunywa ya familia yawe…'),
+      [Tx('Boiled or treated', 'Yamechemshwa au kutibiwa'), Tx('Straight from the river', 'Moja kwa moja kutoka mtoni')],
+      0,
+      Tx('Safe water protects the whole family.', 'Maji salama yanailinda familia nzima.'),
+    ),
   ],
   'safe-sleep': [
-    QuizQ(Tx('How should baby sleep?', 'Mtoto alale vipi?'), [Tx('On the back', 'Chali'), Tx('On the tummy', 'Kifudifudi')], 0, Tx('On the back, every sleep, is safest.', 'Chali, kila anapolala, ni salama zaidi.')),
-    QuizQ(Tx('What should be near baby\'s face when sleeping?', 'Nini kiwe karibu na uso wa mtoto akilala?'), [Tx('Nothing soft', 'Hakuna kitu laini'), Tx('A pillow', 'Mto')], 0, Tx('Pillows and blankets can block breathing.', 'Mito na blanketi vinaweza kuzuia kupumua.')),
+    QuizQ(
+      Tx('How should baby sleep?', 'Mtoto alale vipi?'),
+      [Tx('On the back', 'Chali'), Tx('On the tummy', 'Kifudifudi')],
+      0,
+      Tx('On the back, every sleep, is safest.', 'Chali, kila anapolala, ni salama zaidi.'),
+    ),
+    QuizQ(
+      Tx('What should be near baby\'s face when sleeping?', 'Nini kiwe karibu na uso wa mtoto akilala?'),
+      [Tx('Nothing soft', 'Hakuna kitu laini'), Tx('A pillow', 'Mto')],
+      0,
+      Tx('Pillows and blankets can block breathing.', 'Mito na blanketi vinaweza kuzuia kupumua.'),
+    ),
   ],
   'kmc': [
-    QuizQ(Tx('In kangaroo care, the baby is…', 'Katika malezi ya kangaruu, mtoto yuko…'), [Tx('Skin-to-skin, upright on the chest', 'Ngozi kwa ngozi, wima kifuani'), Tx('Wrapped in a blanket on the bed', 'Amefungwa blanketi kitandani')], 0, Tx('Your body keeps a small baby warm.', 'Mwili wako humpa mtoto mdogo joto.')),
-    QuizQ(Tx('How often should a small baby feed?', 'Mtoto mdogo anyonye mara ngapi?'), [Tx('At least every 2 to 3 hours', 'Angalau kila saa 2 hadi 3'), Tx('Twice a day', 'Mara mbili kwa siku')], 0, Tx('Small babies need frequent feeds to grow.', 'Watoto wadogo wanahitaji kunyonya mara nyingi ili wakue.')),
+    QuizQ(
+      Tx('In kangaroo care, the baby is…', 'Katika malezi ya kangaruu, mtoto yuko…'),
+      [Tx('Skin-to-skin, upright on the chest', 'Ngozi kwa ngozi, wima kifuani'), Tx('Wrapped in a blanket on the bed', 'Amefungwa blanketi kitandani')],
+      0,
+      Tx('Your body keeps a small baby warm.', 'Mwili wako humpa mtoto mdogo joto.'),
+    ),
+    QuizQ(
+      Tx('How often should a small baby feed?', 'Mtoto mdogo anyonye mara ngapi?'),
+      [Tx('At least every 2 to 3 hours', 'Angalau kila saa 2 hadi 3'), Tx('Twice a day', 'Mara mbili kwa siku')],
+      0,
+      Tx('Small babies need frequent feeds to grow.', 'Watoto wadogo wanahitaji kunyonya mara nyingi ili wakue.'),
+    ),
   ],
 };
 
-Lesson? lessonById(String id) { for (final l in lessons) { if (l.id == id) return l; } return null; }
+Lesson? lessonById(String id) {
+  for (final l in lessons) {
+    if (l.id == id) return l;
+  }
+  return null;
+}

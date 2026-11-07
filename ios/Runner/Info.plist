@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MamaBot listens only while you hold the microphone, so you can speak instead of typing.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Your words are turned into text so MamaBot can answer. Nothing is recorded or kept.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

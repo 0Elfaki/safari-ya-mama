@@ -12,8 +12,33 @@ import 'library_screen.dart';
 
 /// Learn tab (MA-51): lessons with pictures, quizzes, first aid, the body self-check and videos.
 /// Pictures and videos from the content kit appear here as soon as they are imported.
-class LearnScreen extends StatelessWidget {
+class LearnScreen extends StatefulWidget {
   const LearnScreen({super.key});
+  @override
+  State<LearnScreen> createState() => _LearnScreenState();
+}
+
+class _LearnScreenState extends State<LearnScreen> {
+  final search = TextEditingController();
+  String q = '';
+  String? cat;
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
+  bool _matches(Lesson l) {
+    final t = q.trim().toLowerCase();
+    if (t.isEmpty) return true;
+    final hay = [
+      l.title.en,
+      l.title.sw,
+      for (final st in l.steps) ...[st.text.en, st.text.sw],
+    ].join(' ').toLowerCase();
+    return t.split(RegExp(r'\s+')).every(hay.contains);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +46,57 @@ class LearnScreen extends StatelessWidget {
     void go(Widget w) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => w));
     final videos = ContentAssets.ofType('video');
     final quizDone = lessons.where((l) => s.quizScore(l.id) != null).length;
+    final filtering = q.trim().isNotEmpty || cat != null;
+    final found = lessons.where((l) => (cat == null || l.category == cat) && _matches(l)).toList();
+    final header = <Widget>[
+      AppSearchField(
+        fieldKey: const Key('learn-search'),
+        controller: search,
+        hint: context.t('Search health topics', 'Tafuta mada za afya'),
+        onChanged: (v) => setState(() => q = v),
+      ),
+      const Gap(Sp.smd),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: Sp.sm),
+              child: ChoiceChip(label: Text(context.t('All', 'Yote')), selected: cat == null, onSelected: (_) => setState(() => cat = null)),
+            ),
+            for (final c in lessonCategories)
+              Padding(
+                padding: const EdgeInsets.only(right: Sp.sm),
+                child: ChoiceChip(
+                  key: Key('learn-cat-${c.key}'),
+                  label: Text(context.tx(c.title)),
+                  selected: cat == c.key,
+                  onSelected: (on) => setState(() => cat = on ? c.key : null),
+                ),
+              ),
+          ],
+        ),
+      ),
+      const Gap(Sp.md),
+    ];
+    if (filtering) {
+      return Pad(
+        children: [
+          ...header,
+          Text(context.t('${found.length} lessons', 'Masomo ${found.length}'), style: Theme.of(context).textTheme.labelSmall),
+          const Gap(Sp.sm),
+          if (found.isEmpty)
+            EmptyState(
+              Icons.search_off,
+              context.t('No lesson matches. Try another word, or ask MamaBot.', 'Hakuna somo linalolingana. Jaribu neno jingine, au uliza MamaBot.'),
+            ),
+          for (final l in found) LessonTile(l),
+        ],
+      );
+    }
     return Pad(
       children: [
+        ...header,
         AppCard(
           key: const Key('learn-cover'),
           padding: EdgeInsets.zero,
@@ -62,28 +136,22 @@ class LearnScreen extends StatelessWidget {
           ),
         ),
         const Gap(12),
-        Row(
+        TileGrid(
           children: [
-            Expanded(
-              child: _Big(
-                key: const Key('learn-first-aid'),
-                icon: Icons.health_and_safety_outlined,
-                tint: C.red,
-                title: context.t('First aid', 'Huduma ya kwanza'),
-                sub: context.t('Choking, CPR, fits, burns', 'Kukabwa, CPR, degedege, kuungua'),
-                onTap: () => go(const FirstAidHubScreen()),
-              ),
+            ActionTile(
+              key: const Key('learn-first-aid'),
+              icon: Icons.health_and_safety_outlined,
+              tint: C.red,
+              label: context.t('First aid', 'Huduma ya kwanza'),
+              sub: context.t('Choking, CPR, fits, burns', 'Kukabwa, CPR, degedege, kuungua'),
+              onTap: () => go(const FirstAidHubScreen()),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _Big(
-                key: const Key('learn-body-check'),
-                icon: Icons.accessibility_new,
-                tint: C.primary,
-                title: context.t('Body check', 'Jichunguze'),
-                sub: context.t('Tap where it hurts', 'Gusa panapouma'),
-                onTap: () => go(const BodyCheckScreen()),
-              ),
+            ActionTile(
+              key: const Key('learn-body-check'),
+              icon: Icons.accessibility_new,
+              label: context.t('Body check', 'Jichunguze'),
+              sub: context.t('Tap where it hurts', 'Gusa panapouma'),
+              onTap: () => go(const BodyCheckScreen()),
             ),
           ],
         ),
@@ -130,30 +198,6 @@ class LearnScreen extends StatelessWidget {
   }
 }
 
-class _Big extends StatelessWidget {
-  final IconData icon;
-  final Color tint;
-  final String title, sub;
-  final VoidCallback onTap;
-  const _Big({super.key, required this.icon, required this.tint, required this.title, required this.sub, required this.onTap});
-  @override
-  Widget build(BuildContext context) => AppCard(
-    onTap: onTap,
-    color: tint.withValues(alpha: .08),
-    border: tint.withValues(alpha: .25),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: tint, size: 30),
-        const Gap(8),
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        Text(sub, style: Theme.of(context).textTheme.bodyMedium),
-      ],
-    ),
-  );
-}
-
-/// Two quick questions after a lesson (MA-52). Right or wrong, she sees why.
 class QuizScreen extends StatefulWidget {
   final String lessonId;
   const QuizScreen(this.lessonId, {super.key});

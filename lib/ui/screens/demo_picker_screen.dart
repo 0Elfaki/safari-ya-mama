@@ -64,7 +64,7 @@ class _DemoPickerScreenState extends State<DemoPickerScreen> {
         child: Pad(
           padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
           children: [
-            Text('Safari ya Mama', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: C.brand)),
+            Text('Safari ya Mama', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: C.primary)),
             const Gap(4),
             Text(context.t('Mother app preview', 'Onyesho la programu ya mama'), style: Theme.of(context).textTheme.titleMedium),
             const Gap(8),

@@ -1,26 +1,37 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/content_assets.dart';
 import 'content_widgets.dart';
 
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:provider/provider.dart';
 
 import '../core/content.dart';
 import '../core/tx.dart';
+import '../state/app_scope.dart';
 import '../state/app_state.dart';
+import '../core/widgets/app_card.dart';
+import '../core/widgets/status_badge.dart';
 import 'theme.dart';
 
+export '../core/widgets/app_button.dart';
+export '../core/widgets/app_card.dart';
+export '../core/widgets/app_header.dart';
+export '../core/widgets/app_scaffold.dart';
+export '../core/widgets/app_text_field.dart';
+export '../core/widgets/emergency_shortcut.dart';
+export '../core/widgets/offline_indicator.dart';
+export '../core/widgets/state_views.dart';
+export '../core/widgets/status_badge.dart';
+
 extension Ctx on BuildContext {
-  AppState get app => watch<AppState>();
-  AppState get appRead => read<AppState>();
+  AppState get app => AppScope.of(this);
+  AppState get appRead => AppScope.read(this);
 
   /// Inline bilingual string: both languages sit side by side in the code (NF-09).
-  String t(String en, String sw) => watch<AppState>().lang == 'sw' ? sw : en;
-  String tx(Tx t) => t.of(watch<AppState>().lang);
+  String t(String en, String sw) => AppScope.of(this).lang == 'sw' ? sw : en;
+  String tx(Tx t) => t.of(AppScope.of(this).lang);
 }
 
 /// Read-aloud with the phone's own voice (works offline once the voice is installed).
@@ -55,22 +66,6 @@ class ListenButton extends StatelessWidget {
   );
 }
 
-/// Persistent one-tap Emergency help (MA-09), shown on every health screen.
-class EmergencyButton extends StatelessWidget {
-  const EmergencyButton({super.key});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(right: 12),
-    child: FilledButton.icon(
-      key: const Key('emergency'),
-      style: FilledButton.styleFrom(backgroundColor: C.red, minimumSize: const Size(44, 44), padding: const EdgeInsets.symmetric(horizontal: 14)),
-      onPressed: () => Navigator.of(context).pushNamed('/emergency'),
-      icon: const Icon(Icons.emergency, size: 20),
-      label: Text(context.t('Emergency', 'Dharura')),
-    ),
-  );
-}
-
 class Pad extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets padding;
@@ -84,44 +79,6 @@ class Gap extends StatelessWidget {
   const Gap([this.h = 16, Key? key]) : super(key: key);
   @override
   Widget build(BuildContext context) => SizedBox(height: h);
-}
-
-class SectionTitle extends StatelessWidget {
-  final String text;
-  final Widget? trailing;
-  const SectionTitle(this.text, {super.key, this.trailing});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(4, 24, 4, 8),
-    child: Row(
-      children: [
-        Expanded(child: Text(text, style: Theme.of(context).textTheme.titleLarge)),
-        ?trailing,
-      ],
-    ),
-  );
-}
-
-class AppCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-  final Color? color;
-  final VoidCallback? onTap;
-  final Color? border;
-  const AppCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.color, this.onTap, this.border});
-  @override
-  Widget build(BuildContext context) => Card(
-    color: color,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(R.card),
-      side: BorderSide(color: border ?? C.line),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Padding(padding: padding, child: child),
-    ),
-  );
 }
 
 /// A row in a list: leading icon tile, title, subtitle, trailing.
@@ -168,33 +125,58 @@ class Row2 extends StatelessWidget {
   );
 }
 
-/// Lesson illustration drawn from SVG (almost no data), with a red or amber badge for danger steps.
+/// Placeholder for a lesson picture that has not been delivered yet: one icon from the app's
+/// icon set on a soft tile (the old drawings were removed). Danger steps carry a red or amber badge.
 class Illus extends StatelessWidget {
   final String art;
   final Level? warn;
   final double height;
   final Color background;
   const Illus(this.art, {super.key, this.warn, this.height = 160, this.background = C.primarySoft});
+
+  static IconData iconFor(String art) => switch (art) {
+    'alert' => Icons.warning_amber_rounded,
+    'headache' => Icons.sick_outlined,
+    'clinic' => Icons.local_hospital_outlined,
+    'phone' => Icons.call_outlined,
+    'bus' => Icons.directions_bus_outlined,
+    'talk' => Icons.forum_outlined,
+    'bag' => Icons.luggage_outlined,
+    'mother_belly' => Icons.pregnant_woman,
+    'lie_left' => Icons.hotel_outlined,
+    'calendar' => Icons.calendar_month_outlined,
+    'clock' => Icons.schedule,
+    'plate' || 'greens' || 'fish' || 'fruit' => Icons.restaurant,
+    'bowl' => Icons.rice_bowl_outlined,
+    'pill' => Icons.medication_outlined,
+    'glass' => Icons.local_drink_outlined,
+    'cloud' => Icons.cloud_outlined,
+    'mother_baby' || 'baby_hat' || 'baby_back' => Icons.child_care,
+    'breastfeed' || 'latch' => Icons.favorite_border,
+    'thermo' => Icons.thermostat,
+    'hands' => Icons.clean_hands_outlined,
+    'cord' => Icons.healing_outlined,
+    'net' => Icons.bed_outlined,
+    _ => Icons.menu_book_outlined,
+  };
+
   @override
   Widget build(BuildContext context) => Container(
     height: height,
-    decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(16)),
+    decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(R.medium)),
     child: Stack(
       children: [
-        Positioned.fill(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SvgPicture.asset('assets/illus/$art.svg', fit: BoxFit.contain),
-          ),
+        Center(
+          child: Icon(iconFor(art), size: (height * .42).clamp(24, 64).toDouble(), color: C.primary.withValues(alpha: .75)),
         ),
         if (warn != null)
           Positioned(
-            right: 10,
-            top: 10,
+            right: 8,
+            top: 8,
             child: CircleAvatar(
-              radius: 15,
+              radius: 13,
               backgroundColor: warn == Level.red ? C.red : C.amberFill,
-              child: const Icon(Icons.priority_high, color: Colors.white, size: 18),
+              child: const Icon(Icons.priority_high, color: Colors.white, size: 16),
             ),
           ),
       ],
@@ -213,6 +195,14 @@ class LevelBanner extends StatelessWidget {
     Level.amber => const Tx('Contact a health worker within 24 hours', 'Wasiliana na mhudumu wa afya ndani ya saa 24'),
     Level.green => const Tx('No warning signs reported today', 'Hakuna dalili za hatari zilizoripotiwa leo'),
   };
+
+  /// Short status names shown as a pill above the action (MamaBot triage states).
+  static Tx status(Level l) => switch (l) {
+    Level.red => const Tx('Emergency', 'Dharura'),
+    Level.amber => const Tx('Prompt clinical review', 'Uchunguzi wa haraka unahitajika'),
+    Level.green => const Tx('No urgent warning identified', 'Hakuna dalili ya hatari iliyoonekana'),
+  };
+
   static Tx sub(Level l) => switch (l) {
     Level.red => const Tx('These are danger signs. Do not wait. Ask someone to go with you.', 'Hizi ni dalili za hatari. Usisubiri. Muombe mtu akusindikize.'),
     Level.amber => const Tx(
@@ -239,6 +229,8 @@ class LevelBanner extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          StatusPill(context.tx(status(level)), color: c, icon: levelIcon(level)),
+          const Gap(12),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -345,40 +337,44 @@ class Choice<T> extends StatelessWidget {
   final String keyPrefix;
   const Choice({super.key, required this.options, required this.value, required this.onChanged, this.keyPrefix = 'opt'});
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (final (v, icon, label) in options)
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: InkWell(
-              key: Key('$keyPrefix-$v'),
-              onTap: () => onChanged(v),
-              borderRadius: BorderRadius.circular(16),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-                decoration: BoxDecoration(
-                  color: value == v ? C.primarySoft : C.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: value == v ? C.primary : C.line, width: value == v ? 2 : 1),
-                ),
-                child: Column(
-                  children: [
-                    Icon(icon, size: 30, color: value == v ? C.primary : C.ink2),
-                    const Gap(6),
-                    Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.2),
-                    ),
-                  ],
+  Widget build(BuildContext context) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (v, icon, label) in options)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: InkWell(
+                key: Key('$keyPrefix-$v'),
+                onTap: () => onChanged(v),
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: value == v ? C.primarySoft : C.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: value == v ? C.primary : C.line, width: value == v ? 2 : 1),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(icon, size: 30, color: value == v ? C.primary : C.ink2),
+                      const Gap(6),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.2),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-    ],
+      ],
+    ),
   );
 }
 
@@ -405,7 +401,10 @@ class ProgressRing extends StatelessWidget {
   final double value;
   final String big, small;
   final double size;
-  const ProgressRing({super.key, required this.value, required this.big, required this.small, this.size = 88});
+
+  /// White ring and text, for the green hero card.
+  final bool onDark;
+  const ProgressRing({super.key, required this.value, required this.big, required this.small, this.size = 88, this.onDark = false});
   @override
   Widget build(BuildContext context) => SizedBox(
     width: size,
@@ -414,35 +413,24 @@ class ProgressRing extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         SizedBox.expand(
-          child: CircularProgressIndicator(value: value.clamp(0, 1), strokeWidth: 8, backgroundColor: C.surface2, color: C.primary, strokeCap: StrokeCap.round),
+          child: CircularProgressIndicator(
+            value: value.clamp(0, 1),
+            strokeWidth: 8,
+            backgroundColor: onDark ? Colors.white.withValues(alpha: .18) : C.surface2,
+            color: onDark ? Colors.white : C.primary,
+            strokeCap: StrokeCap.round,
+          ),
         ),
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               big,
-              style: const TextStyle(fontFamily: display, fontSize: 24, fontWeight: FontWeight.w800, height: 1),
+              style: TextStyle(fontFamily: display, fontSize: 24, fontWeight: FontWeight.w800, height: 1, color: onDark ? Colors.white : C.ink),
             ),
-            Text(small, style: const TextStyle(fontSize: 12, color: C.ink2)),
+            Text(small, style: TextStyle(fontSize: 12, color: onDark ? C.onPrimaryMuted : C.ink2)),
           ],
         ),
-      ],
-    ),
-  );
-}
-
-class EmptyNote extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const EmptyNote(this.icon, this.text, {super.key});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 16),
-    child: Row(
-      children: [
-        Icon(icon, color: C.ink3),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
       ],
     ),
   );
@@ -506,7 +494,7 @@ class _BpPainter extends CustomPainter {
       canvas.drawLine(Offset(l, y(v)), Offset(size.width - r, y(v)), grid);
       tp.text = TextSpan(
         text: '$v',
-        style: const TextStyle(fontSize: 10, color: C.ink3),
+        style: const TextStyle(fontFamily: body, fontSize: 10, color: C.ink3),
       );
       tp.layout();
       tp.paint(canvas, Offset(l - tp.width - 6, y(v) - tp.height / 2));
@@ -544,7 +532,7 @@ class _BpPainter extends CustomPainter {
     if (p.isNotEmpty) {
       tp.text = TextSpan(
         text: '${p.last.$2}/${p.last.$3}',
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: C.ink),
+        style: const TextStyle(fontFamily: body, fontSize: 12, fontWeight: FontWeight.w700, color: C.ink),
       );
       tp.layout();
       tp.paint(canvas, Offset(math.min(x(p.length - 1) - tp.width / 2, size.width - tp.width), y(p.last.$2) - tp.height - 8));
@@ -553,4 +541,126 @@ class _BpPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BpPainter old) => old.p != p;
+}
+
+/// "Step 2 of 5" with a thin progress bar (onboarding and other multi-step flows).
+class StepProgress extends StatelessWidget {
+  final int step, total;
+  const StepProgress({super.key, required this.step, required this.total});
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: context.t('Step ${step + 1} of $total', 'Hatua ${step + 1} kati ya $total'),
+    child: ExcludeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.t('Step ${step + 1} of $total', 'Hatua ${step + 1} kati ya $total'), style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: Sp.sm),
+          Row(
+            children: [
+              for (var i = 0; i < total; i++) ...[
+                if (i > 0) const SizedBox(width: Sp.xs),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    height: 4,
+                    decoration: BoxDecoration(color: i <= step ? C.primary : C.line, borderRadius: BorderRadius.circular(R.chip)),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Square-ish action tile used in grids (Home quick actions, Journey tools).
+class ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? sub;
+  final VoidCallback onTap;
+  final Color tint;
+  const ActionTile({super.key, required this.icon, required this.label, required this.onTap, this.sub, this.tint = C.primary});
+  @override
+  Widget build(BuildContext context) => AppCard(
+    onTap: onTap,
+    padding: const EdgeInsets.all(Sp.md),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(color: tint.withValues(alpha: .10), borderRadius: BorderRadius.circular(R.input)),
+          child: Icon(icon, color: tint, size: 24),
+        ),
+        const SizedBox(height: Sp.md),
+        Text(label, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium),
+        if (sub != null) Text(sub!, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
+}
+
+/// A big tile with a picture on top (from the content kit; an icon until the picture arrives).
+/// Home's "How can we help?" grid: one tap, one clear need.
+class PictureTile extends StatelessWidget {
+  final String picture, label;
+  final String? sub;
+  final IconData icon;
+  final VoidCallback onTap;
+  const PictureTile({super.key, required this.picture, required this.icon, required this.label, required this.onTap, this.sub});
+  @override
+  Widget build(BuildContext context) => AppCard(
+    onTap: onTap,
+    padding: const EdgeInsets.all(Sp.smd),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ContentPicture(
+          picture,
+          height: 92,
+          radius: R.medium,
+          fallback: Container(
+            height: 92,
+            decoration: BoxDecoration(color: C.primarySoft, borderRadius: BorderRadius.circular(R.medium)),
+            child: Center(child: Icon(icon, color: C.primary, size: 40)),
+          ),
+        ),
+        const SizedBox(height: Sp.smd),
+        Text(label, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium),
+        if (sub != null) Text(sub!, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
+}
+
+/// Two tiles per row.
+class TileGrid extends StatelessWidget {
+  final List<Widget> children;
+  const TileGrid({super.key, required this.children});
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < children.length; i += 2) ...[
+        if (i > 0) const SizedBox(height: Sp.md - 4),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: children[i]),
+              const SizedBox(width: Sp.md - 4),
+              Expanded(child: i + 1 < children.length ? children[i + 1] : const SizedBox()),
+            ],
+          ),
+        ),
+      ],
+    ],
+  );
 }

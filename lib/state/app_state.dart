@@ -10,12 +10,15 @@ import 'package:uuid/uuid.dart';
 import '../core/content.dart';
 import '../core/dates.dart';
 import '../core/lessons.g.dart';
+import '../core/note_share.dart';
 import '../core/record_proof.dart';
 import '../core/rules.dart';
 import '../core/tx.dart';
 import '../data/local_store.dart';
 import '../data/remote.dart';
 import '../data/sync_service.dart';
+import '../features/telemedicine/data/booking_service.dart';
+import '../features/community/data/community_service.dart';
 
 const consentTextVersion = 'consent-2026-11';
 
@@ -73,6 +76,16 @@ class AppState extends ChangeNotifier {
   final _uuid = const Uuid();
 
   AppState(this.store, {this.remote, DateTime Function()? clock}) : now = clock ?? DateTime.now;
+
+  /// Mothers' circle and appointments (need the server; kept in their own files).
+  late final community = CommunityService(this);
+  late final bookings = BookingService(this);
+
+  /// Redraw after a change made by [community] or [bookings].
+  void touch() => notifyListeners();
+
+  /// Set by the app: reschedules phone reminders when her appointments change.
+  void Function()? onBookingsChanged;
 
   DateTime get _today => sod(now());
   String _nowIso() => now().toUtc().toIso8601String();
@@ -946,8 +959,30 @@ class AppState extends ChangeNotifier {
 
   Future<void> sendCode(String phone) => remote!.sendCode(phone);
 
+  /// Sign-in is required when the app has a server: every record must be backed up.
+  bool get needsSignIn => hasRemote && !signedIn;
+
   Future<void> verifyCode(String phone, String code) async {
     await remote!.verifyCode(phone, code);
+    await _afterSignIn();
+  }
+
+  /// Staff-assisted sign-in with the 8-digit code the clinic gave her.
+  Future<void> redeemSetupCode(String code) async {
+    await remote!.signInWithSetupCode(code.replaceAll(RegExp(r'\D'), ''));
+    await _afterSignIn();
+  }
+
+  /// Google sign-in. Returns false when she closed the Google window (nothing happened).
+  Future<bool> signInWithGoogle(Future<String?> Function() idToken) async {
+    final token = await idToken();
+    if (token == null) return false;
+    await remote!.signInWithGoogle(token);
+    await _afterSignIn();
+    return true;
+  }
+
+  Future<void> _afterSignIn() async {
     await refreshFacilities();
     // Returning mother on a new phone: merge her server record before sending anything,
     // so this phone never overwrites her clinic or duplicates her pregnancy and visits.
@@ -963,6 +998,14 @@ class AppState extends ChangeNotifier {
       await _insertConsent('share_with_facility', true, f['id']);
     }
     await syncNow();
+    await bookings.refresh();
+    // a mother who already has records on the server (new phone, or set up by her clinic
+    // with records) goes straight to Home; a new one answers the setup questions
+    if (!onboarded && (pregnancy != null || babies.isNotEmpty)) {
+      await store.setMeta('data_consent', consentTextVersion);
+      await store.setMeta('onboarded', true);
+    }
+    notifyListeners();
     await onSignedIn?.call();
   }
 
@@ -1111,4 +1154,92 @@ class AppState extends ChangeNotifier {
   }
 
   String exportJson() => const JsonEncoder.withIndent('  ').convert(store.export());
+
+  // ───────────── Doctor's Note shares (encrypted on the phone; the key is only in the QR)
+
+  /// Encrypts [note], uploads the ciphertext and returns the QR text and expiry.
+  /// Needs her to be signed in and online.
+  Future<({String qr, NoteShare share})> createNoteShare(Map<String, dynamic> note, List<String> sections, {int hours = 24}) async {
+    if (!signedIn) throw RemoteError('Sign in first', permanent: true);
+    final sealed = await sealNote(note);
+    final r = await remote!.rpc('create_note_share', {'p_ciphertext': sealed.ciphertext, 'p_sections': sections, 'p_hours': hours});
+    final row = (r is List ? r.first : r) as Map;
+    final share = NoteShare(id: '${row['id']}', sections: sections, createdAt: now(), expiresAt: DateTime.parse('${row['expires_at']}').toLocal());
+    return (qr: shareQrPayload(share.id, sealed.key), share: share);
+  }
+
+  Future<List<NoteShare>> myNoteShares() async {
+    if (!signedIn) return const [];
+    final r = await remote!.rpc('my_note_shares', {});
+    return [for (final row in (r as List? ?? const [])) NoteShare.fromRow(row as Map)];
+  }
+
+  Future<void> revokeNoteShare(String id) async {
+    await remote!.rpc('revoke_note_share', {'p_id': id});
+    notifyListeners();
+  }
+
+  // ───────────── phone reminders and the notifications list (settings stay on this phone)
+
+  /// Reminders shown by the phone itself. Off until she turns them on (the phone asks permission).
+  bool get phoneReminders => store.meta<bool>('phone_reminders', false)!;
+
+  /// Show what the reminder is about on the lock screen. Off by default (shared phones).
+  bool get reminderDetails => store.meta<bool>('reminder_details', false)!;
+
+  /// 'HH:mm' for 'check', 'tablet' and 'movements'.
+  String reminderTime(String kind) => store.meta<String>('rt_$kind') ?? const {'check': '09:00', 'tablet': '08:00', 'movements': '19:00'}[kind] ?? '09:00';
+
+  Future<void> setReminderTime(String kind, String hhmm) async {
+    await store.setMeta('rt_$kind', hhmm);
+    notifyListeners();
+  }
+
+  /// Today's reminders she has not ticked yet (the badge on the bell).
+  int get unreadNotifications => reminders.where((r) => !reminderDone(r.id)).length;
+
+  // ───────────── kept on this phone only (never synced): care plan, movement diary, onboarding extras
+
+  /// Agreement to keep her information in the app (required to start). Versioned with the consent text.
+  bool get dataConsent => store.meta<String>('data_consent') == consentTextVersion;
+  Future<void> setDataConsent(bool v) async {
+    await store.setMeta('data_consent', v ? consentTextVersion : null);
+    notifyListeners();
+  }
+
+  /// single | twins | multiple | unknown (pregnancy only).
+  String get pregnancyType => store.meta<String>('pregnancy_type', 'unknown')!;
+  Future<void> setPregnancyType(String v) async {
+    await store.setMeta('pregnancy_type', v);
+    notifyListeners();
+  }
+
+  /// Emergency care plan: where to go and who to call. Keys: hospital_name, hospital_address,
+  /// hospital_phone, contact_name, contact_phone, transport_name, transport_phone.
+  Map<String, String> get carePlan {
+    final m = store.meta<Map>('care_plan');
+    return m == null ? {} : {for (final e in m.entries) '${e.key}': '${e.value ?? ''}'};
+  }
+
+  Future<void> saveCarePlan(Map<String, String> v) async {
+    await store.setMeta('care_plan', {for (final e in v.entries) e.key: _cap(e.value.trim(), 120)});
+    notifyListeners();
+  }
+
+  /// Baby's movements, one answer per day: usual | fewer | none. There is no number to reach;
+  /// "fewer" or "none" always means contact a health worker today (lesson "kicks").
+  List<Map<String, dynamic>> get movementLog {
+    final l = [for (final m in store.meta<List>('movement_log', const []) ?? const []) asMap(m)];
+    l.sort((a, b) => '${b['day']}'.compareTo('${a['day']}'));
+    return l;
+  }
+
+  String? get movementToday => movementLog.where((m) => m['day'] == isoDay(_today)).firstOrNull?['answer'] as String?;
+
+  Future<void> logMovement(String answer) async {
+    final day = isoDay(_today);
+    final l = movementLog.where((m) => m['day'] != day).toList()..insert(0, {'day': day, 'answer': answer});
+    await store.setMeta('movement_log', l.take(60).toList());
+    notifyListeners();
+  }
 }

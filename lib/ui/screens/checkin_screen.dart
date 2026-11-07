@@ -1,3 +1,7 @@
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -222,7 +226,7 @@ class CheckinResultScreen extends StatelessWidget {
           if (t.level == Level.red) ...[
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: C.red, minimumSize: const Size.fromHeight(60)),
-              onPressed: () => Navigator.of(context).pushNamed('/emergency'),
+              onPressed: () => context.push(Routes.emergency),
               icon: const Icon(Icons.emergency),
               label: Text(context.t('What to do now', 'Nini cha kufanya sasa')),
             ),

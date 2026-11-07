@@ -42,11 +42,27 @@ class FakeRemote implements RemoteApi {
   /// Canned RPC replies by function name (null when absent).
   final rpcResults = <String, dynamic>{};
 
+  /// Live RPC replies by function name: they see the parameters (and may throw).
+  final rpcHandlers = <String, dynamic Function(Map<String, dynamic>)>{};
+
   @override
   Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
     calls.add('rpc $fn');
     _maybeFail();
-    return rpcResults[fn];
+    final h = rpcHandlers[fn];
+    return h != null ? h(params) : rpcResults[fn];
+  }
+
+  /// Edge Function replies by name; a handler sees the body (and may throw).
+  final invokeHandlers = <String, dynamic Function(Map<String, dynamic>)>{};
+  final invokeBodies = <Map<String, dynamic>>[];
+
+  @override
+  Future<dynamic> invoke(String fn, Map<String, dynamic> body) async {
+    calls.add('invoke $fn');
+    invokeBodies.add(body);
+    _maybeFail();
+    return invokeHandlers[fn]?.call(body);
   }
 
   /// Rows the server will return on the next pull, per table.
@@ -67,6 +83,22 @@ class FakeRemote implements RemoteApi {
   @override
   Future<void> verifyCode(String phone, String code) async {
     calls.add('verify $phone $code');
+    uid = 'mother-1';
+  }
+
+  /// Codes the fake clinic has issued; a redeemed code is removed.
+  final setupCodes = <String>{};
+
+  @override
+  Future<void> signInWithSetupCode(String code) async {
+    calls.add('setup $code');
+    if (!setupCodes.remove(code)) throw RemoteError('setup code refused', permanent: true);
+    uid = 'mother-1';
+  }
+
+  @override
+  Future<void> signInWithGoogle(String idToken) async {
+    calls.add('google');
     uid = 'mother-1';
   }
 

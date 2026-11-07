@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:provider/provider.dart';
-import 'package:safari_ya_mama/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safari_ya_mama/app/app.dart';
+import 'package:safari_ya_mama/app/providers.dart';
 import 'package:safari_ya_mama/data/local_store.dart';
 import 'package:safari_ya_mama/state/app_state.dart';
 
@@ -21,7 +22,7 @@ void main() {
     t.view.physicalSize = const Size(1080, 2340);
     t.view.devicePixelRatio = 2.75;
     addTearDown(t.view.reset);
-    await t.pumpWidget(ChangeNotifierProvider.value(value: s, child: const SafariYaMamaApp()));
+    await t.pumpWidget(ProviderScope(overrides: [appStateProvider.overrideWith((ref) => s)], child: const SafariYaMamaApp()));
     await t.pumpAndSettle();
   }
 
@@ -42,10 +43,14 @@ void main() {
     await pump(t);
     expect(find.text('Safari ya Mama'), findsWidgets);
     await tapKey(t, 'lang-en');
-    expect(find.text('Choose your language'), findsOneWidget);
-    await tapKey(t, 'ob-next');
+    expect(find.text('A safer journey into motherhood'), findsOneWidget);
+    await tapKey(t, 'get-started');
+    expect(find.text('Step 1 of 5'), findsOneWidget);
+    // a name is needed before Continue
+    expect(t.widget<FilledButton>(find.byKey(const Key('ob-next'))).onPressed, isNull);
     await t.enterText(find.byKey(const Key('ob-name')), 'Amina');
     await t.pumpAndSettle();
+    await tapKey(t, 'ob-next');
     // 28 weeks: tap + 16 times from 12
     for (var i = 0; i < 16; i++) {
       await t.tap(find.byIcon(Icons.add).first);
@@ -53,13 +58,17 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('28'), findsOneWidget);
     await tapKey(t, 'ob-next');
-    // consent screen: everything off by default
+    await tapKey(t, 'ob-next'); // emergency contacts: optional
+    // consent screen: sharing off by default; the data agreement is required
     final sw = t.widget<SwitchListTile>(find.byKey(const Key('consent-share_with_facility')));
     expect(sw.value, isFalse);
+    expect(t.widget<FilledButton>(find.byKey(const Key('ob-next'))).onPressed, isNull);
+    await tapKey(t, 'consent-data');
     await tapKey(t, 'ob-next');
     await tapKey(t, 'ob-next'); // skip PIN
     expect(find.text('Hello, Amina'), findsOneWidget);
-    expect(find.text('Month 7 of 9'), findsOneWidget);
+    expect(find.text('28 weeks, 0 days'), findsOneWidget);
+    expect(find.text('3 of 3'), findsOneWidget);
 
     await tapKey(t, 'today-check');
     await tapKey(t, 'feel-ok');
@@ -73,8 +82,8 @@ void main() {
 
     await t.tap(find.text('What to do now'));
     await t.pumpAndSettle();
-    expect(find.text('Emergency help'), findsOneWidget);
-    expect(find.text('What to bring'), findsOneWidget);
+    expect(find.text('Emergency care plan'), findsOneWidget);
+    expect(find.text('Need urgent help?'), findsOneWidget);
   });
 
   testWidgets('green check-in never says "fine" and explains its limits (Kiswahili)', (t) async {

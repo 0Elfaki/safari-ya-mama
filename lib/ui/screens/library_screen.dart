@@ -1,3 +1,7 @@
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../core/content.dart';
@@ -17,7 +21,7 @@ class LibraryScreen extends StatelessWidget {
     final s = context.app;
     Widget tile(Lesson l) => LessonTile(l);
     return Scaffold(
-      appBar: AppBar(title: Text(context.t('Learn with pictures', 'Jifunze kwa picha')), actions: const [EmergencyButton()]),
+      appBar: AppBar(title: Text(context.t('All lessons', 'Masomo yote')), actions: const [EmergencyButton()]),
       body: Pad(
         children: [
           AppCard(
@@ -89,7 +93,7 @@ class LessonTile extends StatelessWidget {
                 children: [
                   Text(context.tx(l.title), style: Theme.of(context).textTheme.titleMedium),
                   Text(
-                    '${l.steps.length} ${context.t('pictures', 'picha')} · ${l.minutes} min${q == null ? '' : ' · ${context.t('quiz', 'maswali')} $q/$n'}',
+                    '${l.steps.length} ${context.t('steps', 'hatua')} · ${l.minutes} min${q == null ? '' : ' · ${context.t('quiz', 'maswali')} $q/$n'}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -164,25 +168,23 @@ class _LessonScreenState extends State<LessonScreen> {
                 return Pad(
                   children: [
                     if (k == 0 && l.facts.isNotEmpty) ...[_KeyFacts(l), const Gap(16)],
-                    ContentPicture(
-                      '${l.asset}-P${k + 1}',
-                      height: 220,
-                      fallback: Illus(
-                        st.art,
-                        warn: st.warn,
-                        height: 220,
-                        background: st.warn == Level.red
-                            ? C.redSoft
-                            : st.warn == Level.amber
-                            ? C.amberSoft
-                            : C.primarySoft,
-                      ),
-                    ),
+                    ContentPicture('${l.asset}-P${k + 1}', height: 220, fallback: const SizedBox.shrink()),
                     const Gap(24),
-                    Text(
-                      context.tx(st.text),
-                      style: const TextStyle(fontFamily: display, fontSize: 22, fontWeight: FontWeight.w700, height: 1.3),
-                    ),
+                    if (st.warn != null) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: StatusBadge(
+                          st.warn == Level.red
+                              ? context.t('Danger sign: go now', 'Dalili ya hatari: nenda sasa')
+                              : context.t('Get help today', 'Pata msaada leo'),
+                          color: levelColor(st.warn!),
+                          icon: levelIcon(st.warn!),
+                          background: levelSoft(st.warn!),
+                        ),
+                      ),
+                      const Gap(Sp.smd),
+                    ],
+                    Text(context.tx(st.text), style: AppTypography.h3.copyWith(fontSize: 22)),
                     const Gap(16),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -321,7 +323,7 @@ class _GetHelp extends StatelessWidget {
           FilledButton.icon(
             key: const Key('lesson-emergency'),
             style: FilledButton.styleFrom(backgroundColor: C.red, minimumSize: const Size(44, 48)),
-            onPressed: () => Navigator.of(context).pushNamed('/emergency'),
+            onPressed: () => context.push(Routes.emergency),
             icon: const Icon(Icons.emergency),
             label: Text(context.t('Emergency help', 'Msaada wa dharura')),
           ),
